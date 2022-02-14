@@ -48,7 +48,7 @@ public class MessageDecoder implements Decoder.Text<Message> {
     public void destroy() {}
 
     private Message.Type typeOf(JsonObject json) {
-        var type = json.getString("type");
-        return Message.Type.valueOf(type);
+        return Message.Type.valueOf(
+                json.getString("type"));
     }
 }

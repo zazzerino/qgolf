@@ -64,7 +64,7 @@ public class UserRepository implements Repository<Long, UserEntity> {
 
     @Override
     public void delete(Long id) {
-        var user = findById(id).orElseThrow();
-        entityManager.remove(user);
+        var entity = findById(id).orElseThrow();
+        entityManager.remove(entity);
     }
 }

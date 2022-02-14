@@ -19,11 +19,8 @@ class UserRepositoryTest {
     @Test
     @TestTransaction
     void create() {
-        var user = new UserEntity();
-        user.name = "Frank";
-        user.sessionId = "s0";
-
-        user = userRepository.create(user);
+        var user = userRepository.create(
+                UserEntity.of("Frank", "s0"));
 
         assertNotNull(user.id);
         assertEquals("Frank", user.name);
@@ -35,11 +32,8 @@ class UserRepositoryTest {
     void findAll() {
         assertTrue(userRepository.findAll().isEmpty());
 
-        var user = new UserEntity();
-        user.name = "alice";
-        user.sessionId = "s0";
-
-        user = userRepository.create(user);
+        var user = userRepository.create(
+                UserEntity.of("alice", "s0"));
 
         assertNotNull(user);
         assertTrue(user.id > 0);
@@ -49,11 +43,8 @@ class UserRepositoryTest {
     @Test
     @TestTransaction
     void findBySessionId() {
-        var user = new UserEntity();
-        user.name = "Charlie";
-        user.sessionId = "s0";
-
-        user = userRepository.create(user);
+        var user = userRepository.create(
+                UserEntity.of("Charlie", "s0"));
 
         var foundUser = userRepository.findBySessionId("s0").orElseThrow();
         assertEquals(user, foundUser);
@@ -65,9 +56,8 @@ class UserRepositoryTest {
         var oldName = "Gandalf the Grey";
         var newName = "Gandalf the Green";
 
-        var user = new UserEntity();
-        user.name = oldName;
-        user.sessionId = "s0";
+        var user = userRepository.create(
+                UserEntity.of(oldName, "s0"));
 
         assertEquals(oldName, user.name);
 
@@ -84,11 +74,8 @@ class UserRepositoryTest {
     void delete() {
         assertTrue(userRepository.findAll().isEmpty());
 
-        var user = new UserEntity();
-        user.name = "Frank";
-        user.sessionId = "s0";
-
-        user = userRepository.create(user);
+        var user = userRepository.create(
+                UserEntity.of("Frank", "s0"));
 
         assertEquals(1, userRepository.findAll().size());
 

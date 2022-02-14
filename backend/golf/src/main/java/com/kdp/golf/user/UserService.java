@@ -33,8 +33,9 @@ public class UserService {
 
     @Transactional
     public User createUser(String sessionId) {
+        var name = User.DEFAULT_NAME;
         var entity = userRepository.create(
-                UserEntity.of(User.DEFAULT_NAME, sessionId));
+                UserEntity.of(name, sessionId));
 
         return entity.toUser();
     }
