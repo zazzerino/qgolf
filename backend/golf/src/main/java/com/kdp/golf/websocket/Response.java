@@ -13,7 +13,7 @@ public interface Response {
         Game,
     }
 
-    record User(User user) implements Response {
+    record User(com.kdp.golf.user.User user) implements Response {
         @Override
         public Type type() {
             return Type.User;

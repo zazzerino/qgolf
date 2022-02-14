@@ -11,15 +11,15 @@ import java.util.Optional;
 @ApplicationScoped
 public class UserRepository implements Repository<Long, UserEntity> {
 
-    private final EntityManager manager;
+    private final EntityManager entityManager;
 
-    public UserRepository(EntityManager manager) {
-        this.manager = manager;
+    public UserRepository(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Override
     public List<UserEntity> findAll() {
-        var query = manager.createQuery(
+        var query = entityManager.createQuery(
                 "SELECT u FROM User u",
                 UserEntity.class);
 
@@ -32,7 +32,7 @@ public class UserRepository implements Repository<Long, UserEntity> {
                 SELECT u FROM User u
                 WHERE u.id = :id""";
 
-        var query = manager.createQuery(hql, UserEntity.class);
+        var query = entityManager.createQuery(hql, UserEntity.class);
         query.setParameter("id", id);
         var result = query.getSingleResult();
 
@@ -44,7 +44,7 @@ public class UserRepository implements Repository<Long, UserEntity> {
                 SELECT u FROM User u
                 WHERE u.sessionId = :sessionId""";
 
-        var query = manager.createQuery(hql, UserEntity.class);
+        var query = entityManager.createQuery(hql, UserEntity.class);
         query.setParameter("sessionId", sessionId);
         var result = query.getSingleResult();
 
@@ -53,18 +53,18 @@ public class UserRepository implements Repository<Long, UserEntity> {
 
     @Override
     public UserEntity create(UserEntity user) {
-        manager.persist(user);
+        entityManager.persist(user);
         return user;
     }
 
     @Override
     public void update(UserEntity user) {
-        manager.persist(user);
+        entityManager.persist(user);
     }
 
     @Override
     public void delete(Long id) {
         var user = findById(id).orElseThrow();
-        manager.remove(user);
+        entityManager.remove(user);
     }
 }

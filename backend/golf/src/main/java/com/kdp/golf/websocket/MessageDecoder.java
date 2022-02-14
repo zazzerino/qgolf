@@ -32,7 +32,7 @@ public class MessageDecoder implements Decoder.Text<Message> {
             }
         }
 
-        throw new IllegalStateException("couldn't decode message: " + s);
+        throw new DecodeException(s, "could not decode message");
     }
 
     @Override
