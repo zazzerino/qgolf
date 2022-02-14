@@ -1,4 +1,4 @@
-package com.kdp.golf.lib;
+package com.kdp.golf;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -13,9 +13,9 @@ public interface Repository<I, T> {
 
     Optional<T> findById(I id);
 
-    Optional<T> create(T t);
+    T create(T t);
 
-    boolean update(T t);
+    void update(T t);
 
-    boolean delete(I id);
+    void delete(I id);
 }

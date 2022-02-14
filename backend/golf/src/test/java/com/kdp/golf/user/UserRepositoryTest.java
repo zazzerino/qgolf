@@ -1,52 +1,59 @@
 package com.kdp.golf.user;
 
+import com.kdp.golf.user.db.UserEntity;
+import com.kdp.golf.user.db.UserRepository;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
-import javax.sql.DataSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 class UserRepositoryTest {
 
-    @Inject DataSource dataSource;
-    @Inject UserRepository userRepository;
+    @Inject
+    UserRepository userRepository;
 
     @Test
     @TestTransaction
     void create() {
+        var user = new UserEntity();
+        user.name = "Frank";
+        user.sessionId = "s0";
+
+        user = userRepository.create(user);
+
+        assertNotNull(user.id);
+        assertEquals("Frank", user.name);
+        assertEquals("s0", user.sessionId);
+    }
+
+    @Test
+    @TestTransaction
+    void findAll() {
         assertTrue(userRepository.findAll().isEmpty());
 
-        var user = userRepository
-                .create(User.of("Charlie", "s0"))
-                .orElseThrow();
+        var user = new UserEntity();
+        user.name = "alice";
+        user.sessionId = "s0";
+
+        user = userRepository.create(user);
 
         assertNotNull(user);
-        assertTrue(user.id() > 0);
+        assertTrue(user.id > 0);
         assertEquals(1, userRepository.findAll().size());
     }
 
     @Test
     @TestTransaction
-    void findById() {
-        var user = userRepository
-                .create(User.of("Frank", "s0"))
-                .orElseThrow();
-
-        assertNotNull(user.id());
-        assertEquals("Frank", user.name());
-        assertEquals("s0", user.sessionId());
-    }
-
-    @Test
-    @TestTransaction
     void findBySessionId() {
-        var user = userRepository
-                .create(User.of("Charlie", "s0"))
-                .orElseThrow();
+        var user = new UserEntity();
+        user.name = "Charlie";
+        user.sessionId = "s0";
+
+        user = userRepository.create(user);
 
         var foundUser = userRepository.findBySessionId("s0").orElseThrow();
         assertEquals(user, foundUser);
@@ -58,17 +65,17 @@ class UserRepositoryTest {
         var oldName = "Gandalf the Grey";
         var newName = "Gandalf the Green";
 
-        var user = userRepository
-                .create(User.of(oldName, "s0"))
-                .orElseThrow();
+        var user = new UserEntity();
+        user.name = oldName;
+        user.sessionId = "s0";
 
-        assertEquals(oldName, user.name());
+        assertEquals(oldName, user.name);
 
-        var res = userRepository.update(user.withName(newName));
-        assertTrue(res);
+        user.name = newName;
+        userRepository.update(user);
 
-        var foundUser = userRepository.findById(user.id()).orElseThrow();
-        assertEquals(newName, foundUser.name());
+        var foundUser = userRepository.findById(user.id).orElseThrow();
+        assertEquals(newName, foundUser.name);
 
     }
 
@@ -77,15 +84,15 @@ class UserRepositoryTest {
     void delete() {
         assertTrue(userRepository.findAll().isEmpty());
 
-        var user = userRepository
-                .create(User.of("Frank", "session9000"))
-                .orElseThrow();
+        var user = new UserEntity();
+        user.name = "Frank";
+        user.sessionId = "s0";
+
+        user = userRepository.create(user);
 
         assertEquals(1, userRepository.findAll().size());
 
-        var res = userRepository.delete(user.id());
-        assertTrue(res);
-
+        userRepository.delete(user.id);
         assertTrue(userRepository.findAll().isEmpty());
     }
 }

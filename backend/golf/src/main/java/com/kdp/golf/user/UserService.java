@@ -1,27 +1,29 @@
 package com.kdp.golf.user;
 
+import com.kdp.golf.user.db.UserEntity;
+import com.kdp.golf.user.db.UserRepository;
+
 import javax.enterprise.context.ApplicationScoped;
-import javax.sql.DataSource;
 import javax.transaction.Transactional;
 import java.util.Optional;
 
 @ApplicationScoped
 public class UserService {
 
-    private final DataSource dataSource;
     private final UserRepository userRepository;
 
-    public UserService(DataSource dataSource, UserRepository UserRepository) {
-        this.dataSource = dataSource;
-        this.userRepository = UserRepository;
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
+        return userRepository.findById(id)
+                .map(UserEntity::toUser);
     }
 
     public Optional<User> findBySessionId(String sessionId) {
-        return userRepository.findBySessionId(sessionId);
+        return userRepository.findBySessionId(sessionId)
+                .map(UserEntity::toUser);
     }
 
     public Optional<Long> findUserId(String sessionId) {
@@ -30,22 +32,27 @@ public class UserService {
     }
 
     @Transactional
-    public Optional<User> createUser(String sessionId) {
-        var name = User.DEFAULT_NAME;
-        var user = User.of(name, sessionId);
-        return userRepository.create(user);
+    public User createUser(String sessionId) {
+        var entity = new UserEntity();
+        entity.name = User.DEFAULT_NAME;
+        entity.sessionId = sessionId;
+        entity = userRepository.create(entity);
+
+        return entity.toUser();
     }
 
     @Transactional
-    public Optional<User> updateName(Long userId, String name) {
-        var user = userRepository.findById(userId).orElseThrow();
-        var success = userRepository.update(user.withName(name));
-        return success ? Optional.of(user) : Optional.empty();
+    public User updateName(Long userId, String name) {
+        var entity = userRepository.findById(userId).orElseThrow();
+        entity.name = name;
+        userRepository.update(entity);
+
+        return entity.toUser();
     }
 
     @Transactional
-    public boolean deleteUser(String sessionId) {
+    public void deleteUser(String sessionId) {
         var userId = findUserId(sessionId).orElseThrow();
-        return userRepository.delete(userId);
+        userRepository.delete(userId);
     }
 }

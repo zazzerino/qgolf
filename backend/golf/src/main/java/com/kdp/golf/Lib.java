@@ -1,4 +1,4 @@
-package com.kdp.golf.lib;
+package com.kdp.golf;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,8 +22,8 @@ public class Lib {
     }
 
     public static <T> boolean indicesEqual(List<T> items, List<Integer> indices) {
-        var picked = pickItems(items, indices);
-        return allEqual(picked);
+        var pickedItems = pickItems(items, indices);
+        return allEqual(pickedItems);
     }
 
     public static <T, U> Map<T,U> removeKeys(Map<T, U> map, Collection<T> keys) {
