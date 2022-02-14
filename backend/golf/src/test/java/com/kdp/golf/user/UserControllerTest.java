@@ -35,7 +35,7 @@ class UserControllerTest {
             assertNotNull(response);
         }
 
-        Thread.sleep(500);
+        Thread.sleep(100); // this gives the userController time to clean up the db entry
     }
 
     @ClientEndpoint
