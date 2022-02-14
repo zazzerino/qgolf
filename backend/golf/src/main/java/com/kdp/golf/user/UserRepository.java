@@ -1,25 +1,33 @@
 package com.kdp.golf.user;
 
-import com.kdp.golf.Lib;
+import com.kdp.golf.lib.LibSQL;
+import com.kdp.golf.lib.Repository;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
-import java.sql.Connection;
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
-public class UserDao {
+public class UserRepository implements Repository<Long, User> {
 
-    private final Logger log = Logger.getLogger(UserDao.class);
+    private final DataSource dataSource;
+    private final Logger log = Logger.getLogger(UserRepository.class);
 
-    public List<User> findAll(Connection connection) {
+    public UserRepository(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    @Override
+    public List<User> findAll() {
         var sql = "SELECT * FROM person";
         var users = new ArrayList<User>();
 
-        try (var statement = connection.prepareStatement(sql)) {
+        try (var connection = dataSource.getConnection();
+             var statement = connection.prepareStatement(sql)) {
             var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -35,11 +43,13 @@ public class UserDao {
         return users;
     }
 
-    public Optional<User> findById(Connection connection, Long userId) {
+    @Override
+    public Optional<User> findById(Long id) {
         var sql = "SELECT * FROM person WHERE id = ?";
 
-        try (var statement = connection.prepareStatement(sql)) {
-            statement.setLong(1, userId);
+        try (var connection = dataSource.getConnection();
+             var statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, id);
             var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
@@ -53,10 +63,11 @@ public class UserDao {
         return Optional.empty();
     }
 
-    public Optional<User> findBySessionId(Connection connection, String sessionId) {
+    public Optional<User> findBySessionId(String sessionId) {
         var sql = "SELECT * FROM person WHERE session_id = ?";
 
-        try (var statement = connection.prepareStatement(sql)) {
+        try (var connection = dataSource.getConnection();
+             var statement = connection.prepareStatement(sql)) {
             statement.setString(1, sessionId);
             var resultSet = statement.executeQuery();
 
@@ -71,18 +82,19 @@ public class UserDao {
         return Optional.empty();
     }
 
-    public Optional<String> findName(Connection connection, Long userId) {
-        return findById(connection, userId)
-                .map(User::name);
-    }
 
-    public Optional<User> create(Connection connection, String name, String sessionId) {
+    @Override
+    public Optional<User> create(User u) {
         var sql = """
                 INSERT INTO person (name, session_id)
                 VALUES (?, ?)
                 RETURNING id""";
 
-        try (var statement = connection.prepareStatement(sql)) {
+        var name = u.name();
+        var sessionId = u.sessionId();
+
+        try (var connection = dataSource.getConnection();
+             var statement = connection.prepareStatement(sql)) {
             statement.setString(1, name);
             statement.setString(2, sessionId);
             var resultSet = statement.executeQuery();
@@ -99,13 +111,15 @@ public class UserDao {
         return Optional.empty();
     }
 
-    public boolean update(Connection connection, User user) {
+    @Override
+    public boolean update(User user) {
         var sql = """
                 UPDATE person
                 SET name = ?, session_id = ?
                 WHERE id = ?""";
 
-        try (var statement = connection.prepareStatement(sql)) {
+        try (var connection = dataSource.getConnection();
+             var statement = connection.prepareStatement(sql)) {
             statement.setString(1, user.name());
             statement.setString(2, user.sessionId());
             statement.setLong(3, user.id());
@@ -118,8 +132,14 @@ public class UserDao {
         }
     }
 
-    public boolean delete(Connection connection, Long id) {
-        var sql = "DELETE FROM person WHERE id = ?";
-        return Lib.deleteById(connection, sql, id, log);
+    @Override
+    public boolean delete(Long id) {
+        try (var connection = dataSource.getConnection()) {
+            var sql = "DELETE FROM person WHERE id = ?";
+            return LibSQL.deleteById(connection, sql, id, log);
+        } catch (SQLException e) {
+            log.error(e.getStackTrace());
+            return false;
+        }
     }
 }

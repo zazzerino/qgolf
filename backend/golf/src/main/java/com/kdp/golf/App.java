@@ -31,9 +31,9 @@ public class App {
         log.info("initializing database...");
         var schemaPath = Paths.get("src/main/resources/schema.sql");
 
-        try (var lines = Files.lines(schemaPath);
-             var connection = dataSource.getConnection();
-             var statement = connection.createStatement()) {
+        try (var connection = dataSource.getConnection();
+             var statement = connection.createStatement();
+             var lines = Files.lines(schemaPath);) {
             var sql = lines.collect(Collectors.joining("\n"));
             statement.execute(sql);
         }
