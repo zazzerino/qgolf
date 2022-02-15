@@ -12,9 +12,8 @@ public class MessageDecoder implements Decoder.Text<Message> {
     public Message decode(String s) throws DecodeException {
         var json = new JsonObject(s);
         var userId = json.getLong("userId");
-        var messageType = typeOf(json);
 
-        switch (messageType) {
+        switch (typeOf(json)) {
             case UpdateName -> {
                 var name = json.getString("name");
                 return new Message.UpdateName(userId, name);

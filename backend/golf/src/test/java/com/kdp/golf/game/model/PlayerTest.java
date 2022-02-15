@@ -1,6 +1,5 @@
 package com.kdp.golf.game.model;
 
-import com.kdp.golf.game.model.card.Card;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

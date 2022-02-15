@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public interface GameEvent {
 
-    @JsonProperty
-    Type type();
+    @JsonProperty Type type();
     Long gameId();
     Long playerId();
 
@@ -51,8 +50,8 @@ public interface GameEvent {
         }
     }
 
-    record Discard(Long gameId,
-                   Long playerId) implements GameEvent {
+    record DiscardHeld(Long gameId,
+                       Long playerId) implements GameEvent {
         @Override
         public Type type() {
             return Type.Discard;

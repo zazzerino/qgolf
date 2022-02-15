@@ -13,14 +13,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 class UserRepositoryTest {
 
-    @Inject
-    UserRepository userRepository;
+    @Inject UserRepository userRepository;
 
     @Test
     @TestTransaction
     void create() {
         var user = userRepository.create(
-                UserEntity.of("Frank", "s0"));
+                new UserEntity(null, "Frank", "s0"));
 
         assertNotNull(user.id);
         assertEquals("Frank", user.name);
@@ -33,7 +32,7 @@ class UserRepositoryTest {
         assertTrue(userRepository.findAll().isEmpty());
 
         var user = userRepository.create(
-                UserEntity.of("alice", "s0"));
+                new UserEntity(null, "alice", "s0"));
 
         assertNotNull(user);
         assertTrue(user.id > 0);
@@ -44,7 +43,7 @@ class UserRepositoryTest {
     @TestTransaction
     void findBySessionId() {
         var user = userRepository.create(
-                UserEntity.of("Charlie", "s0"));
+                new UserEntity(null, "Charlie", "s0"));
 
         var foundUser = userRepository.findBySessionId("s0").orElseThrow();
         assertEquals(user, foundUser);
@@ -57,7 +56,7 @@ class UserRepositoryTest {
         var newName = "Gandalf the Green";
 
         var user = userRepository.create(
-                UserEntity.of(oldName, "s0"));
+                new UserEntity(null, oldName, "s0"));
 
         assertEquals(oldName, user.name);
 
@@ -75,7 +74,7 @@ class UserRepositoryTest {
         assertTrue(userRepository.findAll().isEmpty());
 
         var user = userRepository.create(
-                UserEntity.of("Frank", "s0"));
+                new UserEntity(null, "Frank", "s0"));
 
         assertEquals(1, userRepository.findAll().size());
 

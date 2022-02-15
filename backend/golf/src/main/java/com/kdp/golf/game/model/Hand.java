@@ -2,7 +2,6 @@ package com.kdp.golf.game.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kdp.golf.Lib;
-import com.kdp.golf.game.model.card.Card;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,7 +66,6 @@ public class Hand {
     public Card swapCard(Card newCard, int index) {
         var card = cards.get(index);
         cards.set(index, newCard);
-
         return card;
     }
 
@@ -135,14 +133,10 @@ public class Hand {
     }
 
     @JsonProperty
-    public List<Card> cards() {
-        return cards;
-    }
+    public List<Card> cards() { return cards; }
 
     @JsonProperty
-    public Set<Integer> uncoveredCards() {
-        return uncoveredCards;
-    }
+    public Set<Integer> uncoveredCards() { return uncoveredCards; }
 
     @Override
     public boolean equals(Object o) {

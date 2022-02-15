@@ -1,10 +1,7 @@
 package com.kdp.golf.game.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.kdp.golf.game.model.card.Card;
-import com.kdp.golf.game.model.card.CardLocation;
-
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +20,7 @@ public class Game {
     private final List<Card> tableCards;
     private final Map<Long, Player> players;
     private final List<Long> playerOrder;
+    private boolean isFinalTurn;
 
     public final static int DECK_COUNT = 2;
 
@@ -33,7 +31,8 @@ public class Game {
                 Deck deck,
                 List<Card> tableCards,
                 Map<Long, Player> players,
-                List<Long> playerOrder) {
+                List<Long> playerOrder,
+                boolean isFinalTurn) {
         this.id = id;
         this.hostId = hostId;
         this.state = state;
@@ -42,6 +41,7 @@ public class Game {
         this.tableCards = new ArrayList<>(tableCards);
         this.players = new HashMap<>(players);
         this.playerOrder = new ArrayList<>(playerOrder);
+        this.isFinalTurn = isFinalTurn;
     }
 
     public static Game create(Long id, Player host) {
@@ -51,17 +51,27 @@ public class Game {
         var tableCards = List.<Card>of();
         var players = Map.of(host.id(), host);
         var playerOrder = List.of(host.id());
+        var isFinalTurn = false;
 
-        return new Game(id, host.id(), state, turn, deck, tableCards, players, playerOrder);
+        return new Game(
+                id,
+                host.id(),
+                state,
+                turn,
+                deck,
+                tableCards,
+                players,
+                playerOrder,
+                isFinalTurn);
     }
 
-    public void addPlayer(Player player) {
+    public void addPlayer(Player p) {
         if (players.values().size() >= 4) {
             throw new IllegalStateException("can only have a maximum of four players");
         }
 
-        players.put(player.id(), player);
-        playerOrder.add(player.id());
+        players.put(p.id(), p);
+        playerOrder.add(p.id());
     }
 
     public void shuffleDeck() {
@@ -87,7 +97,7 @@ public class Game {
         shuffleDeck();
         dealStartingHands();
         dealTableCard();
-        state = GameState.UncoverTwo;
+        setState(GameState.UncoverTwo);
     }
 
     public void uncoverTwo(Long playerId, int handIndex) {
@@ -103,7 +113,7 @@ public class Game {
                 .allMatch(stillUncovering);
 
         if (allReady) {
-            state = GameState.Take;
+            setState(GameState.Take);
             turn++;
         }
     }
@@ -111,7 +121,7 @@ public class Game {
     public void uncover(Long playerId, int handIndex) {
         var player = players.get(playerId);
         player.uncoverCard(handIndex);
-        state = GameState.Take;
+        setState(GameState.Take);
         turn++;
     }
 
@@ -119,11 +129,7 @@ public class Game {
         var card = deck.deal().orElseThrow();
         var player = players.get(playerId);
         player.holdCard(card);
-
-        state = state == GameState.FinalTake
-                ? GameState.FinalDiscard
-                : GameState.Discard;
-
+        setState(GameState.Discard);
         turn++;
     }
 
@@ -131,11 +137,7 @@ public class Game {
         var card = tableCards.remove(0);
         var player = players.get(playerId);
         player.holdCard(card);
-
-        state = state == GameState.FinalTake
-                ? GameState.FinalDiscard
-                : GameState.Discard;
-
+        setState(GameState.Discard);
         turn++;
     }
 
@@ -167,7 +169,7 @@ public class Game {
                     uncover(e.playerId(), e.handIndex());
                 }
             }
-            case Take, FinalTake -> {
+            case Take -> {
                 if (event instanceof GameEvent.TakeFromDeck e) {
                     takeFromDeck(e.playerId());
                 } else if (event instanceof GameEvent.TakeFromTable e) {
@@ -201,78 +203,62 @@ public class Game {
         return state == GameState.UncoverTwo || playerTurn().equals(playerId);
     }
 
-    public List<CardLocation> playableCards(Long playerId) {
+    public List<Card.Location> playableCards(Long playerId) {
         if (!isPlayersTurn(playerId)) {
             return List.of();
         }
 
         return switch (state) {
             case UncoverTwo, Uncover -> List.of(
-                    CardLocation.Hand0,
-                    CardLocation.Hand1,
-                    CardLocation.Hand2,
-                    CardLocation.Hand3,
-                    CardLocation.Hand4,
-                    CardLocation.Hand5);
+                    Card.Location.Hand0,
+                    Card.Location.Hand1,
+                    Card.Location.Hand2,
+                    Card.Location.Hand3,
+                    Card.Location.Hand4,
+                    Card.Location.Hand5);
 
-            case Take, FinalTake -> List.of(CardLocation.Deck, CardLocation.Table);
+            case Take -> List.of(Card.Location.Deck, Card.Location.Table);
 
-            case Discard, FinalDiscard -> List.of(
-                    CardLocation.Held,
-                    CardLocation.Hand0,
-                    CardLocation.Hand1,
-                    CardLocation.Hand2,
-                    CardLocation.Hand3,
-                    CardLocation.Hand4,
-                    CardLocation.Hand5);
+            case Discard -> List.of(
+                    Card.Location.Held,
+                    Card.Location.Hand0,
+                    Card.Location.Hand1,
+                    Card.Location.Hand2,
+                    Card.Location.Hand3,
+                    Card.Location.Hand4,
+                    Card.Location.Hand5);
 
             default -> List.of();
         };
     }
 
-    @JsonProperty
-    public Long id() {
-        return id;
-    }
+    public Long id() { return id; }
 
-    @JsonProperty
-    public Long hostId() {
-        return hostId;
-    }
+    public Long hostId() { return hostId; }
 
     public void setHostId(Long hostId) {
         this.hostId = hostId;
     }
 
-    @JsonProperty
-    public GameState state() {
-        return state;
+    public GameState state() { return state; }
+
+    public void setState(GameState state) {
+        this.state = state;
     }
 
-    @JsonProperty
-    public int turn() {
-        return turn;
+    public int turn() { return turn; }
+
+    public Deck deck() { return deck; }
+
+    public List<Card> tableCards() { return tableCards; }
+
+    public Collection<Player> players() {
+        return players.values();
     }
 
-    @JsonProperty
-    public Deck deck() {
-        return deck;
-    }
+    public List<Long> playerOrder() { return playerOrder; }
 
-    @JsonProperty
-    public List<Card> tableCards() {
-        return tableCards;
-    }
-
-    @JsonProperty
-    public Map<Long, Player> players() {
-        return players;
-    }
-
-    @JsonProperty
-    public List<Long> playerOrder() {
-        return playerOrder;
-    }
+    public boolean isFinalTurn() { return isFinalTurn; }
 
     @Override
     public boolean equals(Object o) {
@@ -280,6 +266,7 @@ public class Game {
         if (o == null || getClass() != o.getClass()) return false;
         Game game = (Game) o;
         return turn == game.turn
+                && isFinalTurn == game.isFinalTurn
                 && id.equals(game.id)
                 && hostId.equals(game.hostId)
                 && state == game.state
@@ -291,7 +278,7 @@ public class Game {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, hostId, state, turn, deck, tableCards, players, playerOrder);
+        return Objects.hash(id, hostId, state, turn, deck, tableCards, players, playerOrder, isFinalTurn);
     }
 
     @Override
@@ -305,6 +292,7 @@ public class Game {
                 ", tableCards=" + tableCards +
                 ", players=" + players +
                 ", playerOrder=" + playerOrder +
+                ", isFinalTurn=" + isFinalTurn +
                 '}';
     }
 }

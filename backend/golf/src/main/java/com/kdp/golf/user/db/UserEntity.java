@@ -7,8 +7,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 @Entity(name = "User")
 @Table(name = "appuser")
@@ -21,34 +19,31 @@ public class UserEntity {
     public String name;
     public String sessionId;
 
-    public static UserEntity of(Long id, String name, String sessionId) {
-        var entity = new UserEntity();
-        entity.id = id;
-        entity.name = name;
-        entity.sessionId = sessionId;
-        return entity;
-    }
+    public UserEntity() {}
 
-    public static UserEntity of(String name, String sessionId) {
-        return UserEntity.of(null, name, sessionId);
+    public UserEntity(Long id, String name, String sessionId) {
+        this.id = id;
+        this.name = name;
+        this.sessionId = sessionId;
     }
 
     public static UserEntity from(User u) {
-        return UserEntity.of(
+        return new UserEntity(
                 u.id(),
                 u.name(),
                 u.sessionId());
     }
 
-    public static UserEntity from(ResultSet rs) throws SQLException {
-        var id = rs.getLong("id");
-        var name = rs.getString("name");
-        var sessionId = rs.getString("session_id");
-
-        return UserEntity.of(id, name, sessionId);
-    }
-
     public User toUser() {
         return new User(id, name, sessionId);
+    }
+
+    @Override
+    public String toString() {
+        return "UserEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", sessionId='" + sessionId + '\'' +
+                '}';
     }
 }

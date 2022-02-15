@@ -1,6 +1,5 @@
 package com.kdp.golf.game.model;
 
-import com.kdp.golf.game.model.card.Card;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 

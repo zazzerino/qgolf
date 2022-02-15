@@ -34,9 +34,9 @@ public class UserRepository implements Repository<Long, UserEntity> {
 
         var query = entityManager.createQuery(hql, UserEntity.class);
         query.setParameter("id", id);
-        var result = query.getSingleResult();
+        var entity = query.getSingleResult();
 
-        return Optional.ofNullable(result);
+        return Optional.ofNullable(entity);
     }
 
     public Optional<UserEntity> findBySessionId(String sessionId) {

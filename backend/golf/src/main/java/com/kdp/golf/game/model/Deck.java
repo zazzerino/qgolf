@@ -1,9 +1,6 @@
 package com.kdp.golf.game.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.kdp.golf.game.model.card.Card;
-import com.kdp.golf.game.model.card.Rank;
-import com.kdp.golf.game.model.card.Suit;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,8 +19,8 @@ public class Deck {
     public static List<Card> cardList() {
         var cards = new ArrayList<Card>();
 
-        for (var suit : Suit.values()) {
-            for (var rank : Rank.values()) {
+        for (var suit : Card.Suit.values()) {
+            for (var rank : Card.Rank.values()) {
                 var card = new Card(rank, suit);
                 cards.add(card);
             }
@@ -60,10 +57,12 @@ public class Deck {
         }
     }
 
-    @JsonProperty
-    public List<Card> cards() {
-        return cards;
+    public Deck copy() {
+        return new Deck(cards);
     }
+
+    @JsonProperty
+    public List<Card> cards() { return cards; }
 
     @Override
     public boolean equals(Object o) {

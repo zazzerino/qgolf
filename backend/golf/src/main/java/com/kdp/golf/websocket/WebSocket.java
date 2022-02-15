@@ -10,6 +10,7 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -64,17 +65,17 @@ public class WebSocket {
                 });
     }
 
-//    public void sendToSessionId(String sessionId, Response response) {
-//        sendToSession(sessions.get(sessionId), response);
-//    }
+    public void sendToSessionId(String sessionId, Response response) {
+        sendToSession(sessions.get(sessionId), response);
+    }
 
-//    public void sendToSessionIds(Collection<String> sessionIds, Response response) {
-//        sessionIds.forEach(id -> sendToSessionId(id, response));
-////        sessionIds.forEach(id -> sendToSession(sessions.get(id), response));
-//    }
+    public void sendToSessionIds(Collection<String> sessionIds, Response response) {
+        sessionIds.forEach(
+                id -> sendToSessionId(id, response));
+    }
 
-//    public void broadcast(Response response) {
-//        sessions.values()
-//                .forEach(s -> sendToSession(s, response));
-//    }
+    public void broadcast(Response response) {
+        sessions.values()
+                .forEach(s -> sendToSession(s, response));
+    }
 }

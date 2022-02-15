@@ -1,7 +1,5 @@
 package com.kdp.golf.game.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.kdp.golf.game.model.card.Card;
 import com.kdp.golf.user.User;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,22 +64,12 @@ public class Player {
         return hand.uncoveredCards().size();
     }
 
-    @JsonProperty
-    public Long id() {
-        return id;
-    }
+    public Long id() { return id; }
 
-    @JsonProperty
-    public String name() {
-        return name;
-    }
+    public String name() { return name; }
 
-    @JsonProperty
-    public Hand hand() {
-        return hand;
-    }
+    public Hand hand() { return hand; }
 
-    @JsonProperty
     public Optional<Card> heldCard() {
         return Optional.ofNullable(heldCard);
     }

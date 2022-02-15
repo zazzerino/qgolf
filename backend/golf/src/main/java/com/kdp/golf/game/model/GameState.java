@@ -6,7 +6,5 @@ public enum GameState {
     Take,
     Discard,
     Uncover,
-    FinalTake,
-    FinalDiscard,
     GameOver
 }

@@ -11,7 +11,7 @@ class GameTest {
         var host = Player.create(0L, "Charlie");
         var game = Game.create(0L, host);
 
-        assertEquals(1, game.players().values().size());
+        assertEquals(1, game.players().size());
     }
 
     @Test
@@ -19,12 +19,12 @@ class GameTest {
         var host = Player.create(0L, "Charlie");
         var game = Game.create(0L, host);
 
-        assertEquals(1, game.players().values().size());
+        assertEquals(1, game.players().size());
 
         var player = Player.create(1L, "Dee");
         game.addPlayer(player);
 
-        assertEquals(2, game.players().values().size());
+        assertEquals(2, game.players().size());
     }
 
     @Test

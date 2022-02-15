@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public interface Response {
 
-    @JsonProperty
-    Type type();
+    @JsonProperty Type type();
 
     enum Type {
         User,

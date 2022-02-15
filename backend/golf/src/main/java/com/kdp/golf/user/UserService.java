@@ -35,7 +35,7 @@ public class UserService {
     public User createUser(String sessionId) {
         var name = User.DEFAULT_NAME;
         var entity = userRepository.create(
-                UserEntity.of(name, sessionId));
+                new UserEntity(null, name, sessionId));
 
         return entity.toUser();
     }
