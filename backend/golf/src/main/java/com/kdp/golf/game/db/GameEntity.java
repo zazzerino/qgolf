@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -51,9 +52,9 @@ public class GameEntity {
         this.hostId = hostId;
         this.state = state;
         this.turn = turn;
-        this.deck = deck;
-        this.tableCards = tableCards;
-        this.playerOrder = playerOrder;
+        this.deck = new ArrayList<>(deck);
+        this.tableCards = new ArrayList<>(tableCards);
+        this.playerOrder = new ArrayList<>(playerOrder);
         this.isFinalTurn = isFinalTurn;
     }
 
@@ -74,7 +75,7 @@ public class GameEntity {
 
         entity.players = g.players().stream()
                 .map(p -> PlayerEntity.from(p, entity))
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
 
         return entity;
     }

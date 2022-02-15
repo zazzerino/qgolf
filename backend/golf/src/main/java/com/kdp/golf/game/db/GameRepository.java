@@ -43,7 +43,8 @@ public class GameRepository implements Repository<Long, GameEntity> {
 
     @Override
     public void update(GameEntity entity) {
-        entityManager.persist(entity);
+//        entityManager.persist(entity);
+        entityManager.merge(entity);
     }
 
     @Override
