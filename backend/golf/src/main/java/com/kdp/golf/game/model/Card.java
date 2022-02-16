@@ -4,11 +4,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
-@JsonSerialize(using = ToStringSerializer.class, as = String.class)
+@JsonSerialize(as = String.class, using = ToStringSerializer.class)
 public record Card(Rank rank,
                    Suit suit) {
 
@@ -22,18 +20,6 @@ public record Card(Rank rank,
         var suit = Suit.from(chars[1]).orElseThrow();
 
         return new Card(rank, suit);
-    }
-
-    public static List<String> mapName(Collection<Card> cards) {
-        return cards.stream()
-                .map(Card::name)
-                .toList();
-    }
-
-    public static List<Card> mapFrom(Collection<String> cardNames) {
-        return cardNames.stream()
-                .map(Card::from)
-                .toList();
     }
 
     public String name() {
@@ -62,19 +48,19 @@ public record Card(Rank rank,
     }
 
     public enum Rank {
-        ACE("A"),
-        TWO("2"),
-        THREE("3"),
-        FOUR("4"),
-        FIVE("5"),
-        SIX("6"),
-        SEVEN("7"),
-        EIGHT("8"),
-        NINE("9"),
-        TEN("T"),
-        JACK("J"),
-        QUEEN("Q"),
-        KING("K");
+        Ace("A"),
+        Two("2"),
+        Three("3"),
+        Four("4"),
+        Five("5"),
+        Six("6"),
+        Seven("7"),
+        Eight("8"),
+        Nine("9"),
+        Ten("T"),
+        Jack("J"),
+        Queen("Q"),
+        King("K");
 
         public final String value;
 
@@ -84,17 +70,17 @@ public record Card(Rank rank,
 
         public int golfValue() {
             return switch (this) {
-                case KING -> 0;
-                case ACE -> 1;
-                case TWO -> 2;
-                case THREE -> 3;
-                case FOUR -> 4;
-                case FIVE -> 5;
-                case SIX -> 6;
-                case SEVEN -> 7;
-                case EIGHT -> 8;
-                case NINE -> 9;
-                case TEN, JACK, QUEEN -> 10;
+                case King -> 0;
+                case Ace -> 1;
+                case Two -> 2;
+                case Three -> 3;
+                case Four -> 4;
+                case Five -> 5;
+                case Six -> 6;
+                case Seven -> 7;
+                case Eight -> 8;
+                case Nine -> 9;
+                case Ten, Jack, Queen -> 10;
             };
         }
 
@@ -106,10 +92,10 @@ public record Card(Rank rank,
     }
 
     public enum Suit {
-        CLUBS("C"),
-        DIAMONDS("D"),
-        HEARTS("H"),
-        SPADES("S");
+        Clubs("C"),
+        Diamonds("D"),
+        Hearts("H"),
+        Spades("S");
 
         public final String value;
 

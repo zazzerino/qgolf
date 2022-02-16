@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public interface GameEvent {
 
-    @JsonProperty Type type();
+    @JsonProperty
+    Type type();
     Long gameId();
     Long playerId();
 

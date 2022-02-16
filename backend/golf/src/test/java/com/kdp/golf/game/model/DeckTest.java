@@ -24,9 +24,12 @@ class DeckTest {
         var deck = Deck.create(1);
         assertEquals(DECK_SIZE, deck.cards().size());
 
-        var card = deck.deal().orElseThrow();
+        var pair = deck.deal();
+        var card = pair.a().orElseThrow();
+        var newDeck = pair.b();
+
         assertNotNull(card);
-        assertEquals(DECK_SIZE - 1, deck.cards().size());
+        assertEquals(deck.cards().size() - 1, newDeck.cards().size());
     }
 
     @Test

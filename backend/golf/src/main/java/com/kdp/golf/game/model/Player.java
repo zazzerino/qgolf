@@ -1,103 +1,78 @@
 package com.kdp.golf.game.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.kdp.golf.Lib.Pair;
 import com.kdp.golf.user.User;
-import org.jetbrains.annotations.Nullable;
+import org.immutables.value.Value;
 
-import java.util.Objects;
 import java.util.Optional;
 
-public class Player {
+@Value.Immutable
+@JsonSerialize(as = ImmutablePlayer.class)
+public abstract class Player {
 
-    private final Long id;
-    private final String name;
-    private final Hand hand;
-    private @Nullable Card heldCard;
-
-    public Player(Long id, String name, Hand hand, @Nullable Card heldCard) {
-        this.id = id;
-        this.name = name;
-        this.hand = hand;
-        this.heldCard = heldCard;
-    }
+    @Value.Parameter
+    public abstract Long id();
+    @Value.Parameter
+    public abstract String name();
+    @Value.Parameter
+    public abstract Hand hand();
+    @Value.Parameter
+    public abstract Optional<Card> heldCard();
 
     public static Player create(Long id, String name) {
-        return new Player(id, name, Hand.empty(), null);
+        return ImmutablePlayer.of(id, name, Hand.empty(), Optional.empty());
     }
 
     public static Player from(User user) {
         return Player.create(user.id(), user.name());
     }
 
-    public void giveCard(Card card) {
-        hand.addCard(card);
+    public Player giveCard(Card card) {
+        var hand = hand().addCard(card);
+
+        return ImmutablePlayer.copyOf(this)
+                .withHand(hand);
     }
 
-    public void uncoverCard(int handIndex) {
-        hand.uncover(handIndex);
+    public Player uncoverCard(int handIndex) {
+        var hand = hand().uncover(handIndex);
+
+        return ImmutablePlayer.copyOf(this)
+                .withHand(hand);
     }
 
-    public void holdCard(Card card) {
-        heldCard = card;
+    public Player holdCard(Card card) {
+        return ImmutablePlayer.copyOf(this)
+                .withHeldCard(Optional.of(card));
     }
 
-    public Card discard() {
-        if (heldCard == null) {
-            throw new IllegalStateException("null heldCard");
+    public Pair<Optional<Card>, Player> discardHeldCard() {
+        if (heldCard().isEmpty()) {
+            return Pair.of(Optional.empty(), this);
         }
 
-        var card = heldCard;
-        heldCard = null;
-        return card;
+        var player = ImmutablePlayer.copyOf(this)
+                .withHeldCard(Optional.empty());
+
+        return Pair.of(heldCard(), player);
     }
 
-    public Card swapCard(int handIndex) {
-        if (heldCard == null) {
-            throw new IllegalStateException("null heldCard");
+    public Pair<Optional<Card>, Player> swapCard(int handIndex) {
+        if (heldCard().isEmpty()) {
+            return Pair.of(Optional.empty(), this);
         }
 
-        var card = heldCard;
-        heldCard = null;
-        return hand.swapCard(card, handIndex);
+        var pair = hand().swapCard(heldCard().get(), handIndex);
+        var card = pair.a();
+        var hand = pair.b();
+        var player = ImmutablePlayer.copyOf(this)
+                .withHand(hand);
+
+        return Pair.of(card, player);
     }
 
-    public int uncoveredCount() {
-        return hand.uncoveredCards().size();
-    }
-
-    public Long id() { return id; }
-
-    public String name() { return name; }
-
-    public Hand hand() { return hand; }
-
-    public Optional<Card> heldCard() {
-        return Optional.ofNullable(heldCard);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Player player = (Player) o;
-        return id.equals(player.id)
-                && name.equals(player.name)
-                && hand.equals(player.hand)
-                && Objects.equals(heldCard, player.heldCard);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, hand, heldCard);
-    }
-
-    @Override
-    public String toString() {
-        return "Player{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", hand=" + hand +
-                ", heldCard=" + heldCard +
-                '}';
+    public int uncoveredCardCount() {
+        return hand().uncoveredIndices().size();
     }
 }
-

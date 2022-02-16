@@ -1,164 +1,235 @@
 package com.kdp.golf.game.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.collect.ImmutableMap;
+import com.google.errorprone.annotations.Var;
+import com.kdp.golf.Lib;
+import org.immutables.value.Value;
+
+import java.util.*;
 import java.util.function.Predicate;
 
-public class Game {
+@Value.Immutable
+@JsonSerialize(as = ImmutableGame.class)
+public abstract class Game {
 
-    private final Long id;
-    private Long hostId;
-    private GameState state;
-    private int turn;
-    private final Deck deck;
-    private final List<Card> tableCards;
-    private final Map<Long, Player> players;
-    private final List<Long> playerOrder;
-    private boolean isFinalTurn;
+    public abstract Long id();
+    public abstract Long hostId();
+    public abstract State state();
+    public abstract int turn();
+    public abstract Deck deck();
+    public abstract List<Card> tableCards();
+    public abstract Map<Long, Player> players();
+    public abstract List<Long> playerOrder();
+    public abstract boolean isFinalTurn();
 
     public final static int DECK_COUNT = 2;
+    public final static int MAX_PLAYERS = 4;
 
-    public Game(Long id,
-                Long hostId,
-                GameState state,
-                int turn,
-                Deck deck,
-                List<Card> tableCards,
-                Map<Long, Player> players,
-                List<Long> playerOrder,
-                boolean isFinalTurn) {
-        this.id = id;
-        this.hostId = hostId;
-        this.state = state;
-        this.turn = turn;
-        this.deck = deck;
-        this.tableCards = new ArrayList<>(tableCards);
-        this.players = new HashMap<>(players);
-        this.playerOrder = new ArrayList<>(playerOrder);
-        this.isFinalTurn = isFinalTurn;
+    public enum State {
+        Init,
+        UncoverTwo,
+        Take,
+        Discard,
+        Uncover,
+        GameOver,
     }
 
     public static Game create(Long id, Player host) {
-        var state = GameState.Init;
-        var turn = 0;
-        var deck = Deck.create(DECK_COUNT);
-        var tableCards = List.<Card>of();
-        var players = Map.of(host.id(), host);
-        var playerOrder = List.of(host.id());
-        var isFinalTurn = false;
-
-        return new Game(
-                id,
-                host.id(),
-                state,
-                turn,
-                deck,
-                tableCards,
-                players,
-                playerOrder,
-                isFinalTurn);
+        var hostId = host.id();
+        return ImmutableGame.builder()
+                .id(id)
+                .hostId(hostId)
+                .state(State.Init)
+                .turn(0)
+                .deck(Deck.create(DECK_COUNT))
+                .tableCards(List.of())
+                .players(Map.of(hostId, host))
+                .playerOrder(List.of(hostId))
+                .isFinalTurn(false)
+                .build();
     }
 
-    public void addPlayer(Player p) {
-        if (players.values().size() >= 4) {
-            throw new IllegalStateException("can only have a maximum of four players");
+    public Game addPlayer(Player player) {
+        if (players().values().size() >= MAX_PLAYERS) {
+            throw new IllegalStateException("can't have more than MAX_PLAYERS");
         }
 
-        players.put(p.id(), p);
-        playerOrder.add(p.id());
+        var id = player.id();
+        return ImmutableGame.builder()
+                .from(this)
+                .putPlayers(id, player)
+                .addPlayerOrder(id)
+                .build();
     }
 
-    public void shuffleDeck() {
-        deck.shuffle();
+    public Game shuffleDeck() {
+        var deck = deck().shuffle();
+        return ImmutableGame.copyOf(this)
+                .withDeck(deck);
     }
 
-    public void dealStartingHands() {
+    public Game dealStartingHands() {
+        @Var var deck = deck();
+        var players = new HashMap<>(players());
+
         for (int i = 0; i < Hand.HAND_SIZE; i++) {
-            for (var id : playerOrder) {
-                var card = deck.deal().orElseThrow();
-                var player = players.get(id);
-                player.giveCard(card);
+            for (var id : playerOrder()) {
+                var pair = deck.deal();
+                var card = pair.a().orElseThrow();
+                deck = pair.b();
+
+                var player = players.get(id).giveCard(card);
+                players.put(id, player);
             }
         }
+
+        return ImmutableGame.builder()
+                .from(this)
+                .deck(deck)
+                .players(players)
+                .build();
     }
 
-    public void dealTableCard() {
-        var card = deck.deal().orElseThrow();
-        tableCards.add(card);
+    public Game dealTableCard() {
+        var pair = deck().deal();
+        var card = pair.a().orElseThrow();
+        var deck = pair.b();
+
+        return ImmutableGame.builder()
+                .from(this)
+                .addTableCards(card)
+                .deck(deck)
+                .build();
     }
 
-    public void start() {
-        shuffleDeck();
-        dealStartingHands();
-        dealTableCard();
-        setState(GameState.UncoverTwo);
+    public Game start() {
+        var game = shuffleDeck()
+                .dealStartingHands()
+                .dealTableCard();
+
+        return ImmutableGame.copyOf(game)
+                .withState(State.UncoverTwo);
     }
 
-    public void uncoverTwo(Long playerId, int handIndex) {
-        Predicate<Player> stillUncovering = p -> p.uncoveredCount() < 2;
-        var player = players.get(playerId);
+    public Game uncoverTwo(Long playerId, int handIndex) {
+        Predicate<Player> stillUncovering = p -> p.uncoveredCardCount() < 2;
+        @Var var player = players().get(playerId);
 
         if (stillUncovering.test(player)) {
-            player.uncoverCard(handIndex);
+            player = player.uncoverCard(handIndex);
         }
 
-        var allReady = players.values()
-                .stream()
-                .allMatch(stillUncovering);
+        var players = updatePlayer(playerId, player);
+        var allReady = players.values().stream()
+                .noneMatch(stillUncovering);
 
-        if (allReady) {
-            setState(GameState.Take);
-            turn++;
-        }
+        var state = allReady ? State.Take : state();
+        var turn = allReady ? turn() + 1 : turn();
+
+        return ImmutableGame.builder()
+                .from(this)
+                .players(players)
+                .state(state)
+                .turn(turn)
+                .build();
     }
 
-    public void uncover(Long playerId, int handIndex) {
-        var player = players.get(playerId);
-        player.uncoverCard(handIndex);
-        setState(GameState.Take);
-        turn++;
+    public Game uncover(Long playerId, int handIndex) {
+        var player = players().get(playerId)
+                .uncoverCard(handIndex);
+
+        var players = updatePlayer(playerId, player);
+
+        return ImmutableGame.builder()
+                .from(this)
+                .players(players)
+                .turn(turn() + 1)
+                .build();
     }
 
-    public void takeFromDeck(Long playerId) {
-        var card = deck.deal().orElseThrow();
-        var player = players.get(playerId);
-        player.holdCard(card);
-        setState(GameState.Discard);
-        turn++;
+    public Game takeFromDeck(Long playerId) {
+        var pair = deck().deal();
+        var card = pair.a().orElseThrow();
+        var deck = pair.b();
+        var player = players().get(playerId).holdCard(card);
+        var players = Lib.extendMap(
+                players(),
+                Map.of(playerId, player));
+
+        return ImmutableGame.builder()
+                .from(this)
+                .deck(deck)
+                .players(players)
+                .state(State.Discard)
+                .turn(turn() + 1)
+                .build();
     }
 
-    public void takeFromTable(Long playerId) {
-        var card = tableCards.remove(0);
-        var player = players.get(playerId);
-        player.holdCard(card);
-        setState(GameState.Discard);
-        turn++;
+    public Game takeFromTable(Long playerId) {
+        var tableCards = new ArrayDeque<>(tableCards());
+        var card = tableCards.pop();
+        var player = players().get(playerId).holdCard(card);
+        var state = State.Discard;
+        var turn = turn() + 1;
+        var players = Lib.extendMap(
+                players(),
+                Map.of(playerId, player));
+
+        return ImmutableGame.builder()
+                .from(this)
+                .tableCards(tableCards)
+                .players(players)
+                .state(state)
+                .turn(turn)
+                .build();
     }
 
-    public void discard(Long playerId) {
-        var player = players.get(playerId);
-        var card = player.discard();
-        tableCards.add(card);
+
+    public Game discardHeldCard(Long playerId) {
+        @Var var player = players().get(playerId);
+        var pair = player.discardHeldCard();
+        var card = pair.a().orElseThrow();
+        player = pair.b();
+
+        var tableCards = new ArrayDeque<>(tableCards());
+        tableCards.push(card);
+
+        var players = updatePlayer(playerId, player);
+
+        return ImmutableGame.builder()
+                .from(this)
+                .players(players)
+                .tableCards(tableCards)
+                .build();
     }
 
-    public void swapCard(Long playerId, int handIndex) {
-        var player = players.get(playerId);
-        var card = player.swapCard(handIndex);
-        tableCards.add(card);
+    public Game swapCard(Long playerId, int handIndex) {
+        var pair = players().get(playerId)
+                .swapCard(handIndex);
+
+        var card = pair.a().orElseThrow();
+        var player = pair.b();
+
+        var tableCards = new ArrayDeque<>(tableCards());
+        tableCards.push(card);
+
+        var players = updatePlayer(playerId, player);
+
+        return ImmutableGame.builder()
+                .from(this)
+                .players(players)
+                .tableCards(tableCards)
+                .build();
     }
+
 
     public void handleEvent(GameEvent event) {
-        if (!isPlayersTurn(event.playerId())) {
+        if (!playerCanAct(event.playerId())) {
             return;
         }
 
-        switch (state) {
+        switch (state()) {
             case UncoverTwo -> {
                 if (event instanceof GameEvent.Uncover e) {
                     uncoverTwo(e.playerId(), e.handIndex());
@@ -179,36 +250,32 @@ public class Game {
         }
     }
 
-    public List<Long> orderFrom(Long playerId) {
-        var index = playerOrder.indexOf(playerId);
-
-        if (index < 0) {
-            throw new NoSuchElementException("player with id " + playerId + " not found");
-        }
-
-        var order = new ArrayList<>(playerOrder);
-        Collections.rotate(order, -index);
-        return order;
+    public List<Long> playerOrderFrom(Long playerId) {
+        var index = Lib.findIndex(playerOrder(), playerId).orElseThrow();
+        var playerOrder = new ArrayList<>(playerOrder());
+        Collections.rotate(playerOrder, -index);
+        return playerOrder;
     }
 
     /**
      * Returns the id of the player whose turn it is.
      */
     public Long playerTurn() {
-        var index = turn % players.size();
-        return playerOrder.get(index);
+        var index = turn() % players().size();
+        return playerOrder().get(index);
     }
 
-    public boolean isPlayersTurn(Long playerId) {
-        return state == GameState.UncoverTwo || playerTurn().equals(playerId);
+    public boolean playerCanAct(Long playerId) {
+        return playerTurn().equals(playerId)
+                || state() == State.UncoverTwo;
     }
 
     public List<Card.Location> playableCards(Long playerId) {
-        if (!isPlayersTurn(playerId)) {
+        if (!playerCanAct(playerId)) {
             return List.of();
         }
 
-        return switch (state) {
+        return switch (state()) {
             case UncoverTwo, Uncover -> List.of(
                     Card.Location.Hand0,
                     Card.Location.Hand1,
@@ -232,67 +299,9 @@ public class Game {
         };
     }
 
-    public Long id() { return id; }
-
-    public Long hostId() { return hostId; }
-
-    public void setHostId(Long hostId) {
-        this.hostId = hostId;
-    }
-
-    public GameState state() { return state; }
-
-    public void setState(GameState state) {
-        this.state = state;
-    }
-
-    public int turn() { return turn; }
-
-    public Deck deck() { return deck; }
-
-    public List<Card> tableCards() { return tableCards; }
-
-    public Collection<Player> players() {
-        return players.values();
-    }
-
-    public List<Long> playerOrder() { return playerOrder; }
-
-    public boolean isFinalTurn() { return isFinalTurn; }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Game game = (Game) o;
-        return turn == game.turn
-                && isFinalTurn == game.isFinalTurn
-                && id.equals(game.id)
-                && hostId.equals(game.hostId)
-                && state == game.state
-                && deck.equals(game.deck)
-                && tableCards.equals(game.tableCards)
-                && players.equals(game.players)
-                && playerOrder.equals(game.playerOrder);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, hostId, state, turn, deck, tableCards, players, playerOrder, isFinalTurn);
-    }
-
-    @Override
-    public String toString() {
-        return "Game{" +
-                "id=" + id +
-                ", hostId=" + hostId +
-                ", state=" + state +
-                ", turn=" + turn +
-                ", deck=" + deck +
-                ", tableCards=" + tableCards +
-                ", players=" + players +
-                ", playerOrder=" + playerOrder +
-                ", isFinalTurn=" + isFinalTurn +
-                '}';
+    private ImmutableMap<Long, Player> updatePlayer(Long id, Player player) {
+        return Lib.extendMap(
+                players(),
+                Map.of(id, player));
     }
 }

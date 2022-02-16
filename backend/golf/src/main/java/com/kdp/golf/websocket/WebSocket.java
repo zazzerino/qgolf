@@ -33,8 +33,9 @@ public class WebSocket {
 
     @OnOpen
     public void onOpen(Session session) {
-        log.info("websocket connected: " + session.getId());
-        sessions.put(session.getId(), session);
+        var sessionId = session.getId();
+        log.info("websocket connected: " + sessionId);
+        sessions.put(sessionId, session);
         userController.connect(session);
     }
 

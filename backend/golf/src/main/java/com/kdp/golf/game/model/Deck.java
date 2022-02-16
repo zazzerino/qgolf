@@ -1,26 +1,25 @@
 package com.kdp.golf.game.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.kdp.golf.Lib.Pair;
+import org.immutables.value.Value;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
-public class Deck {
+@Value.Immutable
+@JsonSerialize(as = ImmutableDeck.class)
+public abstract class Deck {
 
-    private List<Card> cards;
-
-    public Deck (List<Card> cards) {
-        this.cards = new ArrayList<>(cards);
-    }
+    @Value.Parameter
+    public abstract List<Card> cards();
 
     public static List<Card> cardList() {
+        var ranks = Card.Rank.values();
+        var suits = Card.Suit.values();
         var cards = new ArrayList<Card>();
 
-        for (var suit : Card.Suit.values()) {
-            for (var rank : Card.Rank.values()) {
+        for (var rank : ranks) {
+            for (var suit : suits) {
                 var card = new Card(rank, suit);
                 cards.add(card);
             }
@@ -31,56 +30,30 @@ public class Deck {
 
     public static Deck create(int deckCount) {
         assert deckCount > 0;
-
         var cardList = cardList();
-        var cards = new ArrayList<>(cardList);
+        var cards = new ArrayList<Card>();
 
-        for (var i = 1; i < deckCount; i++) {
+        for (var i = 0; i < deckCount; i++) {
             cards.addAll(cardList);
         }
 
-        return new Deck(cards);
+        return ImmutableDeck.of(cards);
     }
 
-    public void shuffle() {
-        var cardsCopy = new ArrayList<>(cards);
-        Collections.shuffle(cardsCopy);
-        cards = cardsCopy;
+    public Deck shuffle() {
+        var cards = new ArrayList<>(cards());
+        Collections.shuffle(cards);
+        return ImmutableDeck.of(cards);
     }
 
-    public Optional<Card> deal() {
+    public Pair<Optional<Card>, Deck> deal() {
         try {
-            var card = cards.remove(0);
-            return Optional.of(card);
-        } catch (Exception _e) {
-            return Optional.empty();
+            var cards = new ArrayDeque<>(cards());
+            var card = Optional.of(cards.pop());
+            var deck = ImmutableDeck.of(cards);
+            return Pair.of(card, deck);
+        } catch (NoSuchElementException _e) {
+            return Pair.of(Optional.empty(), this);
         }
-    }
-
-    public Deck copy() {
-        return new Deck(cards);
-    }
-
-    @JsonProperty
-    public List<Card> cards() { return cards; }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Deck deck = (Deck) o;
-        return cards.equals(deck.cards);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(cards);
-    }
-
-    @Override
-    public String toString() {
-        return "Deck{" +
-                "cards=" + cards +
-                '}';
     }
 }

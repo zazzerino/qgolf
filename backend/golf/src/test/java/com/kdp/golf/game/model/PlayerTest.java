@@ -10,7 +10,7 @@ class PlayerTest {
     void giveCard() {
         var card = Card.from("AS");
         var player = Player.create(0L, "Toots");
-        player.giveCard(card);
+        player = player.giveCard(card);
 
         assertEquals(1, player.hand().cards().size());
     }
@@ -19,11 +19,11 @@ class PlayerTest {
     void uncover() {
         var card = Card.from("AS");
         var player = Player.create(0L, "Mariah");
-        player.giveCard(card);
-        player.uncoverCard(0);
+        player = player.giveCard(card);
+        player = player.uncoverCard(0);
 
         assertTrue(player.hand()
-                .uncoveredCards()
+                .uncoveredIndices()
                 .contains(0));
     }
 
@@ -31,7 +31,7 @@ class PlayerTest {
     void hold() {
         var card = Card.from("KH");
         var player = Player.create(0L, "Toots");
-        player.holdCard(card);
+        player = player.holdCard(card);
 
         assertEquals(card, player.heldCard().orElseThrow());
     }
@@ -40,12 +40,15 @@ class PlayerTest {
     void discard() {
         var card = Card.from("KH");
         var player = Player.create(0L, "Mariah");
-        player.holdCard(card);
+        player = player.holdCard(card);
 
         assertTrue(player.heldCard().isPresent());
         assertEquals(card, player.heldCard().get());
 
-        var discardedCard = player.discard();
+        var pair = player.discardHeldCard();
+        var discardedCard = pair.a().orElseThrow();
+        player = pair.b();
+
         assertTrue(player.heldCard().isEmpty());
         assertNotNull(discardedCard);
     }

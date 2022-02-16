@@ -3,6 +3,7 @@ package com.kdp.golf.user;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusTest;
+import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 
 import javax.websocket.ClientEndpoint;
@@ -14,7 +15,7 @@ import java.net.URI;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 class UserControllerTest {
@@ -33,9 +34,13 @@ class UserControllerTest {
 
             var response = MESSAGES.poll(4, TimeUnit.SECONDS);
             assertNotNull(response);
+            var json = new JsonObject(response);
+
+            var type = json.getString("type");
+            assertEquals("User", type);
         }
 
-        Thread.sleep(100); // this gives the userController time to clean up the db entry
+        Thread.sleep(50); // this keeps the app running long enough to clean up the user after disconnect
     }
 
     @ClientEndpoint

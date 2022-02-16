@@ -1,161 +1,124 @@
 package com.kdp.golf.game.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.kdp.golf.Lib;
+import com.kdp.golf.Lib.Pair;
+import org.immutables.value.Value;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
-public class Hand {
+@Value.Immutable
+@JsonSerialize(as = ImmutableHand.class)
+public abstract class Hand {
 
-    private final List<Card> cards;
-    private final Set<Integer> uncoveredCards;
+    @Value.Parameter
+    public abstract List<Card> cards();
+    @Value.Parameter
+    public abstract Set<Integer> uncoveredIndices();
 
     public static final int HAND_SIZE = 6;
 
-    public Hand(List<Card> cards, Set<Integer> uncoveredCards) {
-        this.cards = new ArrayList<>(cards);
-        this.uncoveredCards = new HashSet<>(uncoveredCards);
-    }
-
-    public Hand(List<Card> cards) {
-        this.cards = new ArrayList<>(cards);
-        this.uncoveredCards = new HashSet<>(HAND_SIZE);
-    }
-
     public static Hand empty() {
-        var cards = new ArrayList<Card>(HAND_SIZE);
-        var uncoveredCards = new HashSet<Integer>(HAND_SIZE);
-
-        return new Hand(cards, uncoveredCards);
+        return ImmutableHand.of(List.of(), Set.of());
     }
 
-    public static Hand of(String... cardNames) {
-        var cards = Arrays.stream(cardNames)
-                .map(Card::from)
-                .toList();
-
-        return new Hand(cards);
+    public Hand uncover(int index) {
+        return ImmutableHand.builder()
+                .from(this)
+                .addUncoveredIndices(index)
+                .build();
     }
 
-    public void uncover(int index) {
-        uncoveredCards.add(index);
-    }
-
-    public void uncoverAll() {
-        uncoveredCards.addAll(Set.of(0, 1, 2, 3, 4, 5));
+    public Hand uncoverAll() {
+        return ImmutableHand.copyOf(this)
+                .withUncoveredIndices(
+                        Set.of(0, 1, 2, 3, 4, 5));
     }
 
     public boolean allCardsUncovered() {
-        return uncoveredCards.size() == HAND_SIZE;
+        return uncoveredIndices().size() == HAND_SIZE;
     }
 
-    public void addCard(Card card) {
-        if (cards.size() >= HAND_SIZE) {
-            throw new IllegalStateException("hand can only hold six cards max");
+    public Hand addCard(Card card) {
+        if (cards().size() >= HAND_SIZE) {
+            throw new IllegalStateException("hand can only hold a maximum of six cards");
         }
 
-        cards.add(card);
+        return ImmutableHand.builder()
+                .from(this)
+                .addCards(card)
+                .build();
     }
 
-    public Card swapCard(Card newCard, int index) {
-        var card = cards.get(index);
+    public Pair<Optional<Card>, Hand> swapCard(Card newCard, int index) {
+        var cards = new ArrayList<>(cards());
+        var oldCard = Optional.of(cards.get(index));
         cards.set(index, newCard);
-        return card;
+        var hand = ImmutableHand.copyOf(this)
+                .withCards(cards);
+
+        return Pair.of(oldCard, hand);
     }
 
-    @JsonProperty
-    public int visibleScore() {
-        var score = 0;
-
-        if (cards.size() != 6) {
-            return score;
-        }
-
-        var ranks = cards.stream().map(Card::rank).toList();
-        var uncoveredMap = new HashMap<Integer, Card>();
-
-        for (var i : uncoveredCards) {
-            var card = cards.get(i);
-            uncoveredMap.put(i, card);
-        }
-
-        // check all six
-
-        // check outer four
-        var outerIndices = List.of(0, 2, 3, 5);
-
-        if (uncoveredMap.keySet().containsAll(outerIndices)
-                && Lib.indicesEqual(ranks, outerIndices)) {
-            score -= 50;
-            Lib.removeKeys(uncoveredMap, outerIndices);
-        }
-
-        // check left four
-
-        // check right four
-
-        // check left column
-        var leftCol = List.of(0, 3);
-
-        if (uncoveredMap.keySet().containsAll(leftCol)
-                && Lib.indicesEqual(ranks, leftCol)) {
-            Lib.removeKeys(uncoveredMap, leftCol);
-        }
-
-        // check middle column
-        var middleCol = List.of(1, 4);
-
-        if (uncoveredMap.keySet().containsAll(middleCol)
-                && Lib.indicesEqual(ranks, middleCol)) {
-            Lib.removeKeys(uncoveredMap, middleCol);
-        }
-
-        // check right column
-        var rightCol = List.of(2, 5);
-
-        if (uncoveredMap.keySet().containsAll(rightCol)
-                && Lib.indicesEqual(ranks, rightCol)) {
-            Lib.removeKeys(uncoveredMap, rightCol);
-        }
-
-        // sum remaining cards
-        for (var card : uncoveredMap.values()) {
-            score += card.golfValue();
-        }
-
-        return score;
-    }
-
-    @JsonProperty
-    public List<Card> cards() { return cards; }
-
-    @JsonProperty
-    public Set<Integer> uncoveredCards() { return uncoveredCards; }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Hand hand = (Hand) o;
-        return cards.equals(hand.cards) && uncoveredCards.equals(hand.uncoveredCards);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(cards, uncoveredCards);
-    }
-
-    @Override
-    public String toString() {
-        return "Hand{" +
-                "cards=" + cards +
-                ", uncoveredCards=" + uncoveredCards +
-                '}';
-    }
+//    public int visibleScore() {
+//        var score = 0;
+//
+//        if (cards().size() != 6) {
+//            return score;
+//        }
+//
+//        var ranks = cards().stream().map(Card::rank).toList();
+//        var uncoveredMap = new HashMap<Integer, Card>();
+//
+//        for (var i : uncoveredIndices()) {
+//            var card = cards().get(i);
+//            uncoveredMap.put(i, card);
+//        }
+//
+//        // check all six
+//
+//        // check outer four
+//        var outerIndices = List.of(0, 2, 3, 5);
+//
+//        if (uncoveredMap.keySet().containsAll(outerIndices)
+//                && Lib.indicesEqual(ranks, outerIndices)) {
+//            score -= 50;
+//            Lib.removeKeys(uncoveredMap, outerIndices);
+//        }
+//
+//        // check left four
+//
+//        // check right four
+//
+//        // check left column
+//        var leftCol = List.of(0, 3);
+//
+//        if (uncoveredMap.keySet().containsAll(leftCol)
+//                && Lib.indicesEqual(ranks, leftCol)) {
+//            Lib.removeKeys(uncoveredMap, leftCol);
+//        }
+//
+//        // check middle column
+//        var middleCol = List.of(1, 4);
+//
+//        if (uncoveredMap.keySet().containsAll(middleCol)
+//                && Lib.indicesEqual(ranks, middleCol)) {
+//            Lib.removeKeys(uncoveredMap, middleCol);
+//        }
+//
+//        // check right column
+//        var rightCol = List.of(2, 5);
+//
+//        if (uncoveredMap.keySet().containsAll(rightCol)
+//                && Lib.indicesEqual(ranks, rightCol)) {
+//            Lib.removeKeys(uncoveredMap, rightCol);
+//        }
+//
+//        // sum remaining cards
+//        for (var card : uncoveredMap.values()) {
+//            score += card.golfValue();
+//        }
+//
+//        return score;
+//    }
 }

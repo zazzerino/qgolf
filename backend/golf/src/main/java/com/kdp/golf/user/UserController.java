@@ -26,8 +26,8 @@ public class UserController {
     }
 
     public void updateName(Session session, String newName) {
-        var user = userService.findBySessionId(session.getId()).orElseThrow();
-        user = userService.updateName(user.id(), newName);
+        var id = userService.findUserId(session.getId()).orElseThrow();
+        var user = userService.updateName(id, newName);
         webSocket.sendToSession(session, new Response.User(user));
     }
 
