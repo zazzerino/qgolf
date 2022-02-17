@@ -2,8 +2,8 @@ DROP TABLE IF EXISTS player;
 DROP TABLE IF EXISTS game;
 DROP TABLE IF EXISTS person;
 
--- The 'person' table represents a user.
--- The name 'person' is used because 'user' would conflict with a builtin postgres table.
+-- The 'user' table represents a user.
+-- The name 'user' is used because 'user' would conflict with a builtin postgres table.
 CREATE TABLE person
 (
     id         BIGSERIAL PRIMARY KEY,
@@ -19,7 +19,8 @@ CREATE TABLE game
     turn         INT       NOT NULL,
     deck         TEXT[]    NOT NULL,
     table_cards  TEXT[]    NOT NULL,
-    player_order BIGINT[]  NOT NULL
+    player_order BIGINT[]  NOT NULL,
+    final_turn   BOOLEAN   NOT NULL
 );
 
 CREATE TABLE player

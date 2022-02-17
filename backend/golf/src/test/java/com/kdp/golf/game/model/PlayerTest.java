@@ -23,7 +23,7 @@ class PlayerTest {
         player = player.uncoverCard(0);
 
         assertTrue(player.hand()
-                .uncoveredIndices()
+                .uncoveredCards()
                 .contains(0));
     }
 

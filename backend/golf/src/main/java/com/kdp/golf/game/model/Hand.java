@@ -1,7 +1,6 @@
 package com.kdp.golf.game.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.kdp.golf.Lib;
 import com.kdp.golf.Lib.Pair;
 import org.immutables.value.Value;
 
@@ -14,7 +13,7 @@ public abstract class Hand {
     @Value.Parameter
     public abstract List<Card> cards();
     @Value.Parameter
-    public abstract Set<Integer> uncoveredIndices();
+    public abstract Set<Integer> uncoveredCards();
 
     public static final int HAND_SIZE = 6;
 
@@ -25,18 +24,18 @@ public abstract class Hand {
     public Hand uncover(int index) {
         return ImmutableHand.builder()
                 .from(this)
-                .addUncoveredIndices(index)
+                .addUncoveredCards(index)
                 .build();
     }
 
     public Hand uncoverAll() {
         return ImmutableHand.copyOf(this)
-                .withUncoveredIndices(
+                .withUncoveredCards(
                         Set.of(0, 1, 2, 3, 4, 5));
     }
 
     public boolean allCardsUncovered() {
-        return uncoveredIndices().size() == HAND_SIZE;
+        return uncoveredCards().size() == HAND_SIZE;
     }
 
     public Hand addCard(Card card) {
@@ -70,7 +69,7 @@ public abstract class Hand {
 //        var ranks = cards().stream().map(Card::rank).toList();
 //        var uncoveredMap = new HashMap<Integer, Card>();
 //
-//        for (var i : uncoveredIndices()) {
+//        for (var i : uncoveredCards()) {
 //            var card = cards().get(i);
 //            uncoveredMap.put(i, card);
 //        }

@@ -16,7 +16,7 @@ class HandTest {
     void create() {
         var hand = Hand.empty();
         assertEquals(0, hand.cards().size());
-        assertEquals(0, hand.uncoveredIndices().size());
+        assertEquals(0, hand.uncoveredCards().size());
     }
 
     @Test
@@ -24,7 +24,7 @@ class HandTest {
         var hand = Hand.empty();
         hand = hand.uncover(2);
 
-        assertTrue(hand.uncoveredIndices()
+        assertTrue(hand.uncoveredCards()
                 .stream()
                 .allMatch(i -> i.equals(2)));
     }

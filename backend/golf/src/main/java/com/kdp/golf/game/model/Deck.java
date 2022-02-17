@@ -31,9 +31,9 @@ public abstract class Deck {
     public static Deck create(int deckCount) {
         assert deckCount > 0;
         var cardList = cardList();
-        var cards = new ArrayList<Card>();
+        var cards = new ArrayList<>(cardList);
 
-        for (var i = 0; i < deckCount; i++) {
+        for (var i = 1; i < deckCount; i++) {
             cards.addAll(cardList);
         }
 

@@ -1,6 +1,5 @@
 package com.kdp.golf;
 
-import com.google.common.collect.ImmutableMap;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
@@ -29,10 +28,10 @@ class LibTest {
 
      @Test
     void extendMap() {
-         var map = ImmutableMap.of("foo", "bar", "baz", "quux");
+         var map = Map.of("foo", "bar", "baz", "quux");
          var changes = Map.of("foo", "fifi");
 
-         var updated = Lib.extendMap(map, changes);
+         var updated = Lib.updateMap(map, changes);
          assertEquals("quux", updated.get("baz"));
          assertEquals("fifi", updated.get("foo"));
      }

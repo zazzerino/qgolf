@@ -1,8 +1,6 @@
 package com.kdp.golf.user;
 
 import com.kdp.golf.DatabaseConnection;
-import com.kdp.golf.user.ImmutableUser;
-import com.kdp.golf.user.db.UserDao;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
@@ -28,6 +26,11 @@ public class UserService {
     public Optional<Long> findUserId(String sessionId) {
         return findBySessionId(sessionId)
                 .map(User::id);
+    }
+
+    public Optional<String> findName(Long userId) {
+        return userDao.findById(userId)
+                .map(User::name);
     }
 
     @Transactional

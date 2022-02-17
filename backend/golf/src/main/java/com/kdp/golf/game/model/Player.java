@@ -73,6 +73,6 @@ public abstract class Player {
     }
 
     public int uncoveredCardCount() {
-        return hand().uncoveredIndices().size();
+        return hand().uncoveredCards().size();
     }
 }

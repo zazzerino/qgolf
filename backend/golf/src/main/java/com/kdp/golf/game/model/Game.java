@@ -120,7 +120,7 @@ public abstract class Game {
             player = player.uncoverCard(handIndex);
         }
 
-        var players = updatePlayer(playerId, player);
+        var players = updatePlayer(player);
         var allReady = players.values().stream()
                 .noneMatch(stillUncovering);
 
@@ -139,12 +139,13 @@ public abstract class Game {
         var player = players().get(playerId)
                 .uncoverCard(handIndex);
 
-        var players = updatePlayer(playerId, player);
+        var players = updatePlayer(player);
+        var turn = turn() + 1;
 
         return ImmutableGame.builder()
                 .from(this)
                 .players(players)
-                .turn(turn() + 1)
+                .turn(turn)
                 .build();
     }
 
@@ -153,16 +154,15 @@ public abstract class Game {
         var card = pair.a().orElseThrow();
         var deck = pair.b();
         var player = players().get(playerId).holdCard(card);
-        var players = Lib.extendMap(
-                players(),
-                Map.of(playerId, player));
+        var players = updatePlayer(player);
+        var turn = turn() + 1;
 
         return ImmutableGame.builder()
                 .from(this)
                 .deck(deck)
                 .players(players)
                 .state(State.Discard)
-                .turn(turn() + 1)
+                .turn(turn)
                 .build();
     }
 
@@ -170,17 +170,14 @@ public abstract class Game {
         var tableCards = new ArrayDeque<>(tableCards());
         var card = tableCards.pop();
         var player = players().get(playerId).holdCard(card);
-        var state = State.Discard;
+        var players = updatePlayer(player);
         var turn = turn() + 1;
-        var players = Lib.extendMap(
-                players(),
-                Map.of(playerId, player));
 
         return ImmutableGame.builder()
                 .from(this)
                 .tableCards(tableCards)
                 .players(players)
-                .state(state)
+                .state(State.Discard)
                 .turn(turn)
                 .build();
     }
@@ -195,7 +192,7 @@ public abstract class Game {
         var tableCards = new ArrayDeque<>(tableCards());
         tableCards.push(card);
 
-        var players = updatePlayer(playerId, player);
+        var players = updatePlayer(player);
 
         return ImmutableGame.builder()
                 .from(this)
@@ -214,7 +211,7 @@ public abstract class Game {
         var tableCards = new ArrayDeque<>(tableCards());
         tableCards.push(card);
 
-        var players = updatePlayer(playerId, player);
+        var players = updatePlayer(player);
 
         return ImmutableGame.builder()
                 .from(this)
@@ -224,37 +221,40 @@ public abstract class Game {
     }
 
 
-    public void handleEvent(GameEvent event) {
+    public Game handleEvent(GameEvent event) {
         if (!playerCanAct(event.playerId())) {
-            return;
+            return this;
         }
 
         switch (state()) {
             case UncoverTwo -> {
                 if (event instanceof GameEvent.Uncover e) {
-                    uncoverTwo(e.playerId(), e.handIndex());
+                    return uncoverTwo(e.playerId(), e.handIndex());
                 }
             }
             case Uncover -> {
                 if (event instanceof GameEvent.Uncover e) {
-                    uncover(e.playerId(), e.handIndex());
+                    return uncover(e.playerId(), e.handIndex());
                 }
             }
             case Take -> {
                 if (event instanceof GameEvent.TakeFromDeck e) {
-                    takeFromDeck(e.playerId());
+                    return takeFromDeck(e.playerId());
                 } else if (event instanceof GameEvent.TakeFromTable e) {
-                    takeFromTable(e.playerId());
+                    return takeFromTable(e.playerId());
                 }
             }
         }
+
+        throw new IllegalStateException(
+                "Unexpected value. state: " + state() + " event: " + event);
     }
 
     public List<Long> playerOrderFrom(Long playerId) {
-        var index = Lib.findIndex(playerOrder(), playerId).orElseThrow();
-        var playerOrder = new ArrayList<>(playerOrder());
-        Collections.rotate(playerOrder, -index);
-        return playerOrder;
+        var order = new ArrayList<>(playerOrder());
+        var index = Lib.findIndex(order, playerId).orElseThrow();
+        Collections.rotate(order, -index);
+        return order;
     }
 
     /**
@@ -299,9 +299,9 @@ public abstract class Game {
         };
     }
 
-    private ImmutableMap<Long, Player> updatePlayer(Long id, Player player) {
-        return Lib.extendMap(
+    private ImmutableMap<Long, Player> updatePlayer(Player player) {
+        return Lib.updateMap(
                 players(),
-                Map.of(id, player));
+                Map.of(player.id(), player));
     }
 }

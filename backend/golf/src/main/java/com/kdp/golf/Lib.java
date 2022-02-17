@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Lib {
@@ -29,21 +30,29 @@ public class Lib {
         return items.stream().distinct().count() == 1;
     }
 
-//    public static <T> boolean indicesEqual(List<T> items, List<Integer> indices) {
-//        var pickedItems = pickItems(items, indices);
-//        return allEqual(pickedItems);
-//    }
+    public static <T> boolean indicesEqual(List<T> items, List<Integer> indices) {
+        var pickedItems = pickItems(items, indices);
+        return allEqual(pickedItems);
+    }
 
-//    public static <T, U> Map<T,U> removeKeys(Map<T, U> map, Collection<T> keys) {
-//        for (var k : keys) {
-//            map.remove(k);
-//        }
-//
-//        return map;
-//    }
+    public static <K, V> Map<K, V> removeKeys(Map<K, V> map, Collection<K> keys) {
+        return map.entrySet().stream()
+                .filter(e -> !keys.contains(e.getKey()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue));
+    }
+
+    public static <T, U> Map<T,U> removeKeysDestructive(Map<T, U> map, Collection<T> keys) {
+        for (var k : keys) {
+            map.remove(k);
+        }
+
+        return map;
+    }
 
     /**
-     * Returns an Optional from list.indexOf().
+     * Returns an Optional from List::indexOf().
      */
     public static <T> Optional<Integer> findIndex(List<T> list, T elem) {
         var index = list.indexOf(elem);
@@ -52,7 +61,7 @@ public class Lib {
                 : Optional.of(index);
     }
 
-    public static <K, V> ImmutableMap<K, V> extendMap(Map<K, V> map, Map<K, V> changes) {
+    public static <K, V> ImmutableMap<K, V> updateMap(Map<K, V> map, Map<K, V> changes) {
         return ImmutableMap.<K, V>builder()
                 .putAll(Maps.difference(map, changes).entriesOnlyOnLeft())
                 .putAll(changes)
