@@ -10,18 +10,18 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
-class PlayerDaoTest {
+class PlayerRowDaoTest {
 
     DatabaseConnection dbConn;
 
-    public PlayerDaoTest(DatabaseConnection dbConn) {
+    public PlayerRowDaoTest(DatabaseConnection dbConn) {
         this.dbConn = dbConn;
     }
 
     @Test
     @TestTransaction
     void createAndFind() {
-        var playerDao = dbConn.jdbi().onDemand(PlayerDao.class);
+        var playerDao = dbConn.jdbi().onDemand(PlayerRowDao.class);
 
         var handCards = List.of("AC", "4S");
         var uncoveredCards = List.of(2, 5);

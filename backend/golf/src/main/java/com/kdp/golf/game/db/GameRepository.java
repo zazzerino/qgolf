@@ -13,26 +13,26 @@ import java.util.Optional;
 @ApplicationScoped
 public class GameRepository {
 
-    private final PlayerDao playerDao;
-    private final GameDao gameDao;
+    private final PlayerRowDao playerRowDao;
+    private final GameRowDao gameRowDao;
     private final UserService userService;
 
     public GameRepository(DatabaseConnection dbConn, UserService userService) {
         var jdbi = dbConn.jdbi();
-        playerDao = jdbi.onDemand(PlayerDao.class);
-        gameDao = jdbi.onDemand(GameDao.class);
+        playerRowDao = jdbi.onDemand(PlayerRowDao.class);
+        gameRowDao = jdbi.onDemand(GameRowDao.class);
 
         this.userService = userService;
     }
 
     public Optional<Game> findById(Long id) {
-        var gameRow = gameDao.findById(id);
+        var gameRow = gameRowDao.findById(id);
 
         if (gameRow.isEmpty()) {
             return Optional.empty();
         }
 
-        var players = playerDao.findPlayers(id)
+        var players = playerRowDao.findPlayers(id)
                 .stream()
                 .map(p -> {
                     var name = userService.findName(p.user()).orElseThrow();
@@ -49,21 +49,21 @@ public class GameRepository {
         var player = Player.from(user);
         
         @Var var gameRow = GameRow.create(player);
-        var id = gameDao.create(gameRow);
+        var id = gameRowDao.create(gameRow);
         gameRow = gameRow.withId(id);
         
         var playerRow = PlayerRow.from(id, player);
-        playerDao.create(playerRow);
+        playerRowDao.create(playerRow);
         
         return gameRow.toGame(List.of(player));
     }
 
     public void update(Game game) {
         var gameRow = GameRow.from(game);
-        gameDao.update(gameRow);
+        gameRowDao.update(gameRow);
     }
 
     public void delete(Long gameId) {
-        gameDao.delete(gameId);
+        gameRowDao.delete(gameId);
     }
 }

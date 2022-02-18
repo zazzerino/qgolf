@@ -8,7 +8,7 @@ import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 
 import java.util.Optional;
 
-public interface GameDao {
+public interface GameRowDao {
 
     @SqlQuery("SELECT * FROM game WHERE id = ?")
     @RegisterRowMapper(GameRow.Mapper.class)

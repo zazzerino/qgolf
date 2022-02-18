@@ -43,7 +43,7 @@ public class Lib {
                         Map.Entry::getValue));
     }
 
-    public static <T, U> Map<T,U> removeKeysDestructive(Map<T, U> map, Collection<T> keys) {
+    public static <K, V> Map<K, V> removeKeysDestructive(Map<K, V> map, Collection<K> keys) {
         for (var k : keys) {
             map.remove(k);
         }
@@ -52,7 +52,7 @@ public class Lib {
     }
 
     /**
-     * Returns an Optional from List::indexOf().
+     * Returns an Optional from List::indexOf.
      */
     public static <T> Optional<Integer> findIndex(List<T> list, T elem) {
         var index = list.indexOf(elem);

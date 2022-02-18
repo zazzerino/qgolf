@@ -120,7 +120,7 @@ public abstract class Game {
             player = player.uncoverCard(handIndex);
         }
 
-        var players = updatePlayer(player);
+        var players = updatePlayers(player);
         var allReady = players.values().stream()
                 .noneMatch(stillUncovering);
 
@@ -139,7 +139,7 @@ public abstract class Game {
         var player = players().get(playerId)
                 .uncoverCard(handIndex);
 
-        var players = updatePlayer(player);
+        var players = updatePlayers(player);
         var turn = turn() + 1;
 
         return ImmutableGame.builder()
@@ -154,7 +154,7 @@ public abstract class Game {
         var card = pair.a().orElseThrow();
         var deck = pair.b();
         var player = players().get(playerId).holdCard(card);
-        var players = updatePlayer(player);
+        var players = updatePlayers(player);
         var turn = turn() + 1;
 
         return ImmutableGame.builder()
@@ -170,7 +170,7 @@ public abstract class Game {
         var tableCards = new ArrayDeque<>(tableCards());
         var card = tableCards.pop();
         var player = players().get(playerId).holdCard(card);
-        var players = updatePlayer(player);
+        var players = updatePlayers(player);
         var turn = turn() + 1;
 
         return ImmutableGame.builder()
@@ -192,7 +192,7 @@ public abstract class Game {
         var tableCards = new ArrayDeque<>(tableCards());
         tableCards.push(card);
 
-        var players = updatePlayer(player);
+        var players = updatePlayers(player);
 
         return ImmutableGame.builder()
                 .from(this)
@@ -211,7 +211,7 @@ public abstract class Game {
         var tableCards = new ArrayDeque<>(tableCards());
         tableCards.push(card);
 
-        var players = updatePlayer(player);
+        var players = updatePlayers(player);
 
         return ImmutableGame.builder()
                 .from(this)
@@ -299,7 +299,7 @@ public abstract class Game {
         };
     }
 
-    private ImmutableMap<Long, Player> updatePlayer(Player player) {
+    private ImmutableMap<Long, Player> updatePlayers(Player player) {
         return Lib.updateMap(
                 players(),
                 Map.of(player.id(), player));
