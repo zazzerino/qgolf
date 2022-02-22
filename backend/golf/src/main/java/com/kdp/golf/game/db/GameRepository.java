@@ -1,7 +1,7 @@
 package com.kdp.golf.game.db;
 
 import com.google.errorprone.annotations.Var;
-import com.kdp.golf.DatabaseConnection;
+import com.kdp.golf.lib.DatabaseConnection;
 import com.kdp.golf.game.model.Game;
 import com.kdp.golf.game.model.Player;
 import com.kdp.golf.user.UserService;
@@ -32,30 +32,32 @@ public class GameRepository {
             return Optional.empty();
         }
 
-        var players = playerRowDao.findPlayers(id)
-                .stream()
-                .map(p -> {
-                    var name = userService.findName(p.user()).orElseThrow();
-                    return p.toPlayer(name);
-                })
-                .toList();
+//        var players = playerRowDao.findPlayers(id)
+//                .stream()
+//                .map(p -> {
+//                    var name = userService.findName(p.user()).orElseThrow();
+//                    return p.toPlayer(name);
+//                })
+//                .toList();
+        var players = List.<Player>of();
 
         var game = gameRow.get().toGame(players);
         return Optional.of(game);
     }
 
     public Game create(Long userId) {
-        var user = userService.findById(userId).orElseThrow();
-        var player = Player.from(user);
-        
-        @Var var gameRow = GameRow.create(player);
-        var id = gameRowDao.create(gameRow);
-        gameRow = gameRow.withId(id);
-        
-        var playerRow = PlayerRow.from(id, player);
-        playerRowDao.create(playerRow);
-        
-        return gameRow.toGame(List.of(player));
+//        var user = userService.findById(userId).orElseThrow();
+//        var player = Player.from(user);
+//
+//        @Var var gameRow = GameRow.create(player);
+//        var id = gameRowDao.create(gameRow);
+//        gameRow = gameRow.withId(id);
+//
+//        var playerRow = PlayerRow.from(id, player);
+//        playerRowDao.create(playerRow);
+//
+//        return gameRow.toGame(List.of(player));
+        return null;
     }
 
     public void update(Game game) {

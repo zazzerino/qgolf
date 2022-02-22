@@ -1,4 +1,4 @@
-package com.kdp.golf;
+package com.kdp.golf.lib;
 
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;

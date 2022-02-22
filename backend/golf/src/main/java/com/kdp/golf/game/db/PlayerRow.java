@@ -25,7 +25,7 @@ public record PlayerRow(Long game,
                 .map(Card::name)
                 .toList();
 
-        var uncoveredCards = player.hand().uncoveredCards().stream().toList();
+        var uncoveredCards = player.hand().uncovered().stream().toList();
 
         var heldCard = player.heldCard()
                 .map(Card::name)

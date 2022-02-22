@@ -1,41 +1,31 @@
 package com.kdp.golf.game.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.kdp.golf.Lib.Pair;
-import org.immutables.value.Value;
+import com.kdp.golf.lib.Lib;
+import com.kdp.golf.lib.Pair;
 
 import java.util.*;
 
-@Value.Immutable
-@JsonSerialize(as = ImmutableHand.class)
-public abstract class Hand {
-
-    @Value.Parameter
-    public abstract List<Card> cards();
-    @Value.Parameter
-    public abstract Set<Integer> uncoveredCards();
+public record Hand(List<Card> cards,
+                   Set<Integer> uncovered) {
 
     public static final int HAND_SIZE = 6;
 
     public static Hand empty() {
-        return ImmutableHand.of(List.of(), Set.of());
+        return new Hand(List.of(), Set.of());
     }
 
     public Hand uncover(int index) {
-        return ImmutableHand.builder()
-                .from(this)
-                .addUncoveredCards(index)
-                .build();
+        var uncovered = Lib.setWithElem(uncovered(), index);
+        return withUncovered(uncovered);
     }
 
     public Hand uncoverAll() {
-        return ImmutableHand.copyOf(this)
-                .withUncoveredCards(
-                        Set.of(0, 1, 2, 3, 4, 5));
+        var uncovered = Set.of(0, 1, 2, 3, 4, 5);
+        return withUncovered(uncovered);
     }
 
     public boolean allCardsUncovered() {
-        return uncoveredCards().size() == HAND_SIZE;
+        return uncovered().size() == HAND_SIZE;
     }
 
     public Hand addCard(Card card) {
@@ -43,23 +33,28 @@ public abstract class Hand {
             throw new IllegalStateException("hand can only hold a maximum of six cards");
         }
 
-        return ImmutableHand.builder()
-                .from(this)
-                .addCards(card)
-                .build();
+        var cards = Lib.listWithElem(cards(), card);
+        return withCards(cards);
     }
 
     public Pair<Optional<Card>, Hand> swapCard(Card newCard, int index) {
         var cards = new ArrayList<>(cards());
-        var oldCard = Optional.of(cards.get(index));
+        var oldCard = Optional.ofNullable(cards.get(index));
         cards.set(index, newCard);
-        var hand = ImmutableHand.copyOf(this)
-                .withCards(cards);
 
+        var hand = withCards(cards);
         return Pair.of(oldCard, hand);
     }
 
-//    public int visibleScore() {
+    public Hand withCards(List<Card> cards) {
+        return new Hand(cards, uncovered);
+    }
+
+    public Hand withUncovered(Set<Integer> uncovered) {
+        return new Hand(cards, uncovered);
+    }
+
+    public int visibleScore() {
 //        var score = 0;
 //
 //        if (cards().size() != 6) {
@@ -67,12 +62,12 @@ public abstract class Hand {
 //        }
 //
 //        var ranks = cards().stream().map(Card::rank).toList();
-//        var uncoveredMap = new HashMap<Integer, Card>();
-//
-//        for (var i : uncoveredCards()) {
-//            var card = cards().get(i);
-//            uncoveredMap.put(i, card);
-//        }
+//        var uncoveredMap = uncovered().stream()
+//                .collect(Collectors.toMap(
+//                        Function.identity(),
+//                        i -> cards().get(i),
+//                        (_prev, next) -> next,
+//                        HashMap::new));
 //
 //        // check all six
 //
@@ -82,7 +77,7 @@ public abstract class Hand {
 //        if (uncoveredMap.keySet().containsAll(outerIndices)
 //                && Lib.indicesEqual(ranks, outerIndices)) {
 //            score -= 50;
-//            Lib.removeKeys(uncoveredMap, outerIndices);
+//            Lib.removeKeysDestructive(uncoveredMap, outerIndices);
 //        }
 //
 //        // check left four
@@ -119,5 +114,7 @@ public abstract class Hand {
 //        }
 //
 //        return score;
-//    }
+        return 0;
+    }
 }
+

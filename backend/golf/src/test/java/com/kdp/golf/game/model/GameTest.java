@@ -13,6 +13,7 @@ class GameTest {
     public void create() {
         var host = Player.create(0L, "Charlie");
         var game = Game.create(0L, host);
+        System.out.println(game);
 
         assertEquals(1, game.players().size());
     }
@@ -26,6 +27,7 @@ class GameTest {
 
         var player = Player.create(1L, "Dee");
         game = game.addPlayer(player);
+        System.out.println(game);
 
         assertEquals(2, game.players().size());
     }
@@ -36,32 +38,34 @@ class GameTest {
         var player2 = Player.create(1L, "Dee");
 
         @Var var game = Game.create(0L, host);
-        game = game.addPlayer(player2)
-                .dealStartingHands();
+        game = game.addPlayer(player2);
+        game = game.dealStartingHands();
+
+        System.out.println(game);
     }
 
-    @Test
-    public void dealTableCard() {
-        var host = Player.create(0L, "Charlie");
-        @Var var game = Game.create(0L, host);
-        game = game.dealTableCard();
-        assertEquals(1, game.tableCards().size());
-    }
-
-    @Test
-    public void start() {
-        var host = Player.create(0L, "Charlie");
-        @Var var game = Game.create(0L, host);
-        game = game.start();
-//        System.out.println(game);
-    }
-
-    @Test
-    void uncoverCard() {
-        var host = Player.create(0L, "Artemis");
-        @Var var game = Game.create(0L, host);
-        game = game.start();
-        game = game.uncover(host.id(), 0);
-//        System.out.println(game);
-    }
+//    @Test
+//    public void dealTableCard() {
+//        var host = Player.create(0L, "Charlie");
+//        @Var var game = Game.create(0L, host);
+//        game = game.dealTableCard();
+//        assertEquals(1, game.tableCards().size());
+//    }
+//
+//    @Test
+//    public void start() {
+//        var host = Player.create(0L, "Charlie");
+//        @Var var game = Game.create(0L, host);
+//        game = game.start();
+////        System.out.println(game);
+//    }
+//
+//    @Test
+//    void uncoverCard() {
+//        var host = Player.create(0L, "Artemis");
+//        @Var var game = Game.create(0L, host);
+//        game = game.start();
+//        game = game.uncover(host.id(), 0);
+////        System.out.println(game);
+//    }
 }

@@ -52,15 +52,16 @@ public record GameRow(Long id,
                 .map(Card::name)
                 .toList();
 
-        return new GameRow(
-                game.id(),
-                game.hostId(),
-                state,
-                game.turn(),
-                deck,
-                tableCards,
-                game.playerOrder(),
-                game.isFinalTurn());
+//        return new GameRow(
+//                game.id(),
+//                game.hostId(),
+//                state,
+//                game.turn(),
+//                deck,
+//                tableCards,
+//                game.playerOrder(),
+//                game.isFinalTurn());
+        return null;
     }
 
     public Game toGame(List<Player> players) {
@@ -68,7 +69,7 @@ public record GameRow(Long id,
                 .map(Card::from)
                 .toList();
 
-        var deck = ImmutableDeck.of(deckCards);
+        var deck = new Deck(deckCards);
 
         var tableCards = tableCards().stream()
                 .map(Card::from)
@@ -79,17 +80,18 @@ public record GameRow(Long id,
                         Player::id,
                         Function.identity()));
 
-        return ImmutableGame.builder()
-                .id(id)
-                .hostId(host())
-                .state(Game.State.valueOf(state()))
-                .turn(turn)
-                .deck(deck)
-                .tableCards(tableCards)
-                .players(playerMap)
-                .playerOrder(playerOrder)
-                .isFinalTurn(finalTurn)
-                .build();
+//        return ImmutableGame.builder()
+//                .id(id)
+//                .hostId(host())
+//                .state(Game.State.valueOf(state()))
+//                .turn(turn)
+//                .deck(deck)
+//                .tableCards(tableCards)
+//                .players(playerMap)
+//                .playerOrder(playerOrder)
+//                .isFinalTurn(finalTurn)
+//                .build();
+        return null;
     }
     
     public GameRow withId(Long id) {

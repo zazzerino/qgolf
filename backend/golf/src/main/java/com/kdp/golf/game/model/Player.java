@@ -1,27 +1,26 @@
 package com.kdp.golf.game.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.kdp.golf.Lib.Pair;
+import com.kdp.golf.lib.Pair;
 import com.kdp.golf.user.User;
-import org.immutables.value.Value;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
-@Value.Immutable
-@JsonSerialize(as = ImmutablePlayer.class)
-public abstract class Player {
+public record Player(Long id,
+                     String name,
+                     Hand hand,
+                     Optional<Card> heldCard) {
 
-    @Value.Parameter
-    public abstract Long id();
-    @Value.Parameter
-    public abstract String name();
-    @Value.Parameter
-    public abstract Hand hand();
-    @Value.Parameter
-    public abstract Optional<Card> heldCard();
+    public Player withHand(Hand hand) {
+        return new Player(id, name, hand, heldCard);
+    }
+
+    public Player withHeldCard(@Nullable Card heldCard) {
+        return new Player(id, name, hand, Optional.ofNullable(heldCard));
+    }
 
     public static Player create(Long id, String name) {
-        return ImmutablePlayer.of(id, name, Hand.empty(), Optional.empty());
+        return new Player(id, name, Hand.empty(), Optional.empty());
     }
 
     public static Player from(User user) {
@@ -30,21 +29,16 @@ public abstract class Player {
 
     public Player giveCard(Card card) {
         var hand = hand().addCard(card);
-
-        return ImmutablePlayer.copyOf(this)
-                .withHand(hand);
+        return withHand(hand);
     }
 
     public Player uncoverCard(int handIndex) {
         var hand = hand().uncover(handIndex);
-
-        return ImmutablePlayer.copyOf(this)
-                .withHand(hand);
+        return withHand(hand);
     }
 
     public Player holdCard(Card card) {
-        return ImmutablePlayer.copyOf(this)
-                .withHeldCard(Optional.of(card));
+        return withHeldCard(card);
     }
 
     public Pair<Optional<Card>, Player> discardHeldCard() {
@@ -52,9 +46,7 @@ public abstract class Player {
             return Pair.of(Optional.empty(), this);
         }
 
-        var player = ImmutablePlayer.copyOf(this)
-                .withHeldCard(Optional.empty());
-
+        var player = withHeldCard(null);
         return Pair.of(heldCard(), player);
     }
 
@@ -63,16 +55,16 @@ public abstract class Player {
             return Pair.of(Optional.empty(), this);
         }
 
-        var pair = hand().swapCard(heldCard().get(), handIndex);
+        var heldCard = heldCard().get();
+        var pair = hand().swapCard(heldCard, handIndex);
         var card = pair.a();
         var hand = pair.b();
-        var player = ImmutablePlayer.copyOf(this)
-                .withHand(hand);
+        var player = withHand(hand);
 
         return Pair.of(card, player);
     }
 
     public int uncoveredCardCount() {
-        return hand().uncoveredCards().size();
+        return hand().uncovered().size();
     }
 }

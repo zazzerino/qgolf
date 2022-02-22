@@ -8,10 +8,6 @@ import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 
 import java.util.Optional;
 
-/**
- * This class provides access to the `user` table.
- * The name `user` is used because `user` would conflict with a builtin postgres table.
- */
 public interface UserDao {
 
     @SqlQuery("SELECT * FROM person WHERE id = ?")

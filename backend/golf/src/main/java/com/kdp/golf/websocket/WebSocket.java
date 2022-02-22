@@ -4,10 +4,7 @@ import com.kdp.golf.user.UserController;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
+import javax.websocket.*;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import java.util.Collection;
@@ -54,7 +51,7 @@ public class WebSocket {
 
     @OnError
     public void onError(Session session, Throwable throwable) {
-        log.error("WS ERROR: ", throwable);
+        log.error("ws error: ", throwable);
     }
 
     public void sendToSession(Session session, Response response) {

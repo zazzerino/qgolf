@@ -1,20 +1,12 @@
-package com.kdp.golf;
+package com.kdp.golf.lib;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Lib {
-
-    public record Pair<A, B>(A a, B b) {
-        public static <A, B> Pair<A, B> of(A a, B b) {
-            return new Pair<>(a, b);
-        }
-    }
 
     public static <T> List<T> pickItems(List<T> list, List<Integer> indices) {
         var items = new ArrayList<T>();
@@ -68,8 +60,15 @@ public class Lib {
                 .build();
     }
 
-    public static <T> Stream<T> cycle(Supplier<Stream<T>> stream) {
-        return Stream.generate(stream)
-                .flatMap(s -> s);
+    public static <T> List<T> listWithElem(List<T> list, T elem) {
+        var copy = new ArrayList<>(list);
+        copy.add(elem);
+        return copy;
+    }
+
+    public static <T> Set<T> setWithElem(Set<T> set, T elem) {
+        var copy = new HashSet<>(set);
+        copy.add(elem);
+        return copy;
     }
 }

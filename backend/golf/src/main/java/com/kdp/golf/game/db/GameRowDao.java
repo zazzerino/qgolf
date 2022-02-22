@@ -17,7 +17,8 @@ public interface GameRowDao {
     @SqlUpdate("""
         INSERT INTO game
         (host, state, turn, deck, table_cards, player_order, final_turn)
-        VALUES (:host, :state, :turn, :deck, :tableCards, :playerOrder, :finalTurn)""")
+        VALUES
+        (:host, :state, :turn, :deck, :tableCards, :playerOrder, :finalTurn)""")
     @GetGeneratedKeys("id")
     Long create(@BindMethods GameRow gameRow);
 

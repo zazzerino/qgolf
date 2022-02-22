@@ -1,6 +1,7 @@
 package com.kdp.golf.websocket;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.kdp.golf.user.User;
 
 public interface Response {
 

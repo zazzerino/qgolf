@@ -1,5 +1,6 @@
 package com.kdp.golf;
 
+import com.kdp.golf.lib.Lib;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 

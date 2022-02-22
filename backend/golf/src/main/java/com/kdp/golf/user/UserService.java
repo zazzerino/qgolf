@@ -1,6 +1,6 @@
 package com.kdp.golf.user;
 
-import com.kdp.golf.DatabaseConnection;
+import com.kdp.golf.lib.DatabaseConnection;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
@@ -37,13 +37,13 @@ public class UserService {
     public User createUser(String sessionId) {
         var name = User.DEFAULT_NAME;
         var id = userDao.create(name, sessionId);
-        return ImmutableUser.of(id, name, sessionId);
+        return new User(id, name, sessionId);
     }
 
     @Transactional
     public User updateName(Long userId, String name) {
         var user = userDao.findById(userId)
-                .map(u -> ImmutableUser.copyOf(u).withName(name))
+                .map(u -> u.withName(name))
                 .orElseThrow();
 
         userDao.update(user);

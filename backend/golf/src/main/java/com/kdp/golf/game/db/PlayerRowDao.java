@@ -24,7 +24,8 @@ public interface PlayerRowDao {
     @SqlUpdate("""
         INSERT INTO player
         (game, person, hand_cards, uncovered_cards, held_card)
-        VALUES (:game, :user, :handCards, :uncoveredCards, :heldCard)""")
+        VALUES 
+        (:game, :user, :handCards, :uncoveredCards, :heldCard)""")
     void create(@BindMethods PlayerRow playerRow);
 
     @SqlUpdate("""

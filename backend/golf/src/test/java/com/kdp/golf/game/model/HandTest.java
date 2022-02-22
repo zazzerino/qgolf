@@ -16,7 +16,7 @@ class HandTest {
     void create() {
         var hand = Hand.empty();
         assertEquals(0, hand.cards().size());
-        assertEquals(0, hand.uncoveredCards().size());
+        assertEquals(0, hand.uncovered().size());
     }
 
     @Test
@@ -24,7 +24,7 @@ class HandTest {
         var hand = Hand.empty();
         hand = hand.uncover(2);
 
-        assertTrue(hand.uncoveredCards()
+        assertTrue(hand.uncovered()
                 .stream()
                 .allMatch(i -> i.equals(2)));
     }
@@ -44,7 +44,7 @@ class HandTest {
                 .map(Card::from)
                 .toList();
 
-        var hand = ImmutableHand.of(cards, Set.of());
+        var hand = new Hand(cards, Set.of());
         var newCard = Card.from("8C");
         var pair = hand.swapCard(newCard, 0);
         var swappedCard = pair.a().orElseThrow();

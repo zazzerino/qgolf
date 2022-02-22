@@ -12,7 +12,6 @@ public record Card(Rank rank,
 
     public static Card from(String s) {
         assert s.length() == 2;
-
         var chars = s.split("(?!^)");
         assert chars.length == 2;
 

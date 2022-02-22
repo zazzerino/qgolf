@@ -27,7 +27,7 @@ public class App {
         Quarkus.run(args);
     }
 
-    void initDatabase(@Observes StartupEvent event) throws IOException, SQLException {
+    void initDatabase(@Observes StartupEvent _ev) throws IOException, SQLException {
         log.info("initializing database...");
         var schemaPath = Paths.get("src/main/resources/schema.sql");
 

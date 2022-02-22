@@ -1,6 +1,6 @@
 package com.kdp.golf.game.db;
 
-import com.kdp.golf.DatabaseConnection;
+import com.kdp.golf.lib.DatabaseConnection;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
