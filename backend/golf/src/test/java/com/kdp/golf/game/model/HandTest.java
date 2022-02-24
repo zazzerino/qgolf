@@ -3,7 +3,9 @@ package com.kdp.golf.game.model;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,7 +24,7 @@ class HandTest {
     @Test
     void uncover() {
         var hand = Hand.empty();
-        hand = hand.uncover(2);
+        hand.uncover(2);
 
         assertTrue(hand.uncovered()
                 .stream()
@@ -33,23 +35,31 @@ class HandTest {
     void addCard() {
         var card = Card.from("AS");
         var hand = Hand.empty();
-        hand = hand.addCard(card);
+        hand.addCard(card);
 
-        assertEquals(card, hand.cards().get(0));
+        assertEquals(card, hand.cards().stream().findFirst().orElseThrow());
     }
 
     @Test
     void swapCard() {
         var cards = Stream.of("2C", "3C", "4C", "5C", "6C", "7C")
                 .map(Card::from)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
 
-        var hand = new Hand(cards, Set.of());
+        var hand = new Hand(cards, new HashSet<>());
         var newCard = Card.from("8C");
-        var pair = hand.swapCard(newCard, 0);
-        var swappedCard = pair.a().orElseThrow();
+        var swappedCard = hand.swapCard(newCard, 0);
 
         assertEquals(Card.from("2C"), swappedCard);
         assertEquals(6, hand.cards().size());
+    }
+
+    @Test
+    void equals() {
+        var hand0 = Hand.empty();
+        var hand1 = Hand.empty();
+
+        assertEquals(hand0, hand0);
+        assertEquals(hand0, hand1);
     }
 }

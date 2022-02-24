@@ -1,6 +1,5 @@
 package com.kdp.golf.game;
 
-import com.google.errorprone.annotations.Var;
 import com.kdp.golf.game.db.GameRepository;
 import com.kdp.golf.game.model.Game;
 import org.jboss.logging.Logger;
@@ -38,14 +37,14 @@ public class GameService {
 
     @Transactional
     public Game startGame(Long gameId, Long userId) {
-        @Var var game = gameRepository.findById(gameId).orElseThrow();
+        var game = gameRepository.findById(gameId).orElseThrow();
 
         if (!Objects.equals(game.hostId(), userId)) {
             throw new IllegalStateException(
                     "user " + userId + " attempted to start game " + gameId + " but they are not the host");
         }
 
-        game = game.start();
+        game.start();
         gameRepository.update(game);
         return game;
     }

@@ -1,13 +1,11 @@
 package com.kdp.golf.game.db;
 
-import com.google.errorprone.annotations.Var;
 import com.kdp.golf.lib.DatabaseConnection;
 import com.kdp.golf.game.model.Game;
 import com.kdp.golf.game.model.Player;
 import com.kdp.golf.user.UserService;
 
 import javax.enterprise.context.ApplicationScoped;
-import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -19,9 +17,8 @@ public class GameRepository {
 
     public GameRepository(DatabaseConnection dbConn, UserService userService) {
         var jdbi = dbConn.jdbi();
-        playerRowDao = jdbi.onDemand(PlayerRowDao.class);
-        gameRowDao = jdbi.onDemand(GameRowDao.class);
-
+        this.playerRowDao = jdbi.onDemand(PlayerRowDao.class);
+        this.gameRowDao = jdbi.onDemand(GameRowDao.class);
         this.userService = userService;
     }
 
@@ -32,32 +29,31 @@ public class GameRepository {
             return Optional.empty();
         }
 
-//        var players = playerRowDao.findPlayers(id)
-//                .stream()
-//                .map(p -> {
-//                    var name = userService.findName(p.user()).orElseThrow();
-//                    return p.toPlayer(name);
-//                })
-//                .toList();
-        var players = List.<Player>of();
+        var players = playerRowDao.findPlayers(id)
+                .stream()
+                .map(p -> {
+                    var name = userService.findName(p.user()).orElseThrow();
+                    return p.toPlayer(name);
+                })
+                .toList();
 
         var game = gameRow.get().toGame(players);
         return Optional.of(game);
     }
 
     public Game create(Long userId) {
-//        var user = userService.findById(userId).orElseThrow();
-//        var player = Player.from(user);
-//
-//        @Var var gameRow = GameRow.create(player);
-//        var id = gameRowDao.create(gameRow);
-//        gameRow = gameRow.withId(id);
-//
-//        var playerRow = PlayerRow.from(id, player);
-//        playerRowDao.create(playerRow);
-//
-//        return gameRow.toGame(List.of(player));
-        return null;
+        var user = userService.findById(userId).orElseThrow();
+        var player = Player.from(user);
+
+        var game = Game.create(null, player);
+        var gameRow = GameRow.from(game);
+        var id = gameRowDao.create(gameRow);
+        game.setId(id);
+
+        var playerRow = PlayerRow.from(game.id(), player);
+        playerRowDao.create(playerRow);
+
+        return game;
     }
 
     public void update(Game game) {

@@ -1,8 +1,7 @@
 package com.kdp.golf.game.db;
 
 import com.kdp.golf.game.model.Card;
-import com.kdp.golf.game.model.ImmutableHand;
-import com.kdp.golf.game.model.ImmutablePlayer;
+import com.kdp.golf.game.model.Hand;
 import com.kdp.golf.game.model.Player;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
@@ -10,43 +9,42 @@ import org.jdbi.v3.core.statement.StatementContext;
 import javax.annotation.Nullable;;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
+import static java.util.stream.Collectors.toCollection;
 
 public record PlayerRow(Long game,
                         Long user,
                         List<String> handCards,
-                        List<Integer> uncoveredCards,
+                        List<Integer> uncovered,
                         @Nullable String heldCard) {
 
-    public static PlayerRow from(Long gameId, Player player) {
-        var handCards = player.hand().cards().stream()
+    public static PlayerRow from(Long gameId, Player p) {
+        var handCards = p.hand().cards().stream()
                 .map(Card::name)
-                .toList();
+                .collect(toCollection(ArrayList::new));
 
-        var uncoveredCards = player.hand().uncovered().stream().toList();
+        var uncoveredCards = p.hand().uncovered().stream().toList();
 
-        var heldCard = player.heldCard()
+        var heldCard = p.heldCard()
                 .map(Card::name)
                 .orElse(null);
 
-        return new PlayerRow(gameId, player.id(), handCards, uncoveredCards, heldCard);
+        return new PlayerRow(gameId, p.id(), handCards, uncoveredCards, heldCard);
     }
 
     public Player toPlayer(String name) {
         var cards = handCards.stream()
                 .map(Card::from)
-                .toList();
+                .collect(toCollection(ArrayList::new));
 
-        var hand = ImmutableHand.of(cards, uncoveredCards);
-        var heldCard = Optional.ofNullable(heldCard())
-                .map(Card::from);
-
-        return ImmutablePlayer.of(user, name, hand, heldCard);
+        var hand = new Hand(cards, new HashSet<>(uncovered));
+        var card = heldCard != null ? Card.from(heldCard) : null;
+        return new Player(user, name, hand, card);
     }
 
     public static class Mapper implements RowMapper<PlayerRow> {
+
         @Override
         public PlayerRow map(ResultSet rs, StatementContext ctx) throws SQLException {
             var game = rs.getLong("game");
@@ -56,7 +54,7 @@ public record PlayerRow(Long game,
                     (String[]) rs.getArray("hand_cards").getArray());
 
             var uncoveredCards = Arrays.asList(
-                    (Integer []) rs.getArray("uncovered_cards").getArray());
+                    (Integer []) rs.getArray("uncovered").getArray());
 
             var heldCard = rs.getString("held_card");
             return new PlayerRow(game, user, handCards, uncoveredCards, heldCard);

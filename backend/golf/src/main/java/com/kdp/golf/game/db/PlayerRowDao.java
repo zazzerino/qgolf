@@ -23,14 +23,14 @@ public interface PlayerRowDao {
 
     @SqlUpdate("""
         INSERT INTO player
-        (game, person, hand_cards, uncovered_cards, held_card)
+        (game, person, hand_cards, uncovered, held_card)
         VALUES 
-        (:game, :user, :handCards, :uncoveredCards, :heldCard)""")
+        (:game, :user, :handCards, :uncovered, :heldCard)""")
     void create(@BindMethods PlayerRow playerRow);
 
     @SqlUpdate("""
         UPDATE player
-        SET hand_cards = :handCards, uncovered_cards = :uncoveredCards, held_card = :heldCard
+        SET hand_cards = :handCards, uncovered = :uncovered, held_card = :heldCard
         WHERE game = :game AND person = :user""")
     void update(@BindMethods PlayerRow playerRow);
 

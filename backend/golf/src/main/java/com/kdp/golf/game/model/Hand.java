@@ -1,57 +1,49 @@
 package com.kdp.golf.game.model;
 
-import com.kdp.golf.lib.Lib;
-import com.kdp.golf.lib.Pair;
+import com.google.common.collect.Iterables;
 
 import java.util.*;
 
-public record Hand(List<Card> cards,
-                   Set<Integer> uncovered) {
+public class Hand {
+
+    private final List<Card> cards;
+    private final Set<Integer> uncovered;
 
     public static final int HAND_SIZE = 6;
+
+    public Hand(List<Card> cards, Set<Integer> uncovered) {
+        this.cards = new ArrayList<>(cards);
+        this.uncovered = new HashSet<>(uncovered);
+    }
 
     public static Hand empty() {
         return new Hand(List.of(), Set.of());
     }
 
-    public Hand uncover(int index) {
-        var uncovered = Lib.setWithElem(uncovered(), index);
-        return withUncovered(uncovered);
+    public void uncover(int index) {
+        uncovered.add(index);
     }
 
-    public Hand uncoverAll() {
-        var uncovered = Set.of(0, 1, 2, 3, 4, 5);
-        return withUncovered(uncovered);
+    public void uncoverAll() {
+        uncovered.addAll(Set.of(0, 1, 2, 3, 4, 5));
     }
 
     public boolean allCardsUncovered() {
         return uncovered().size() == HAND_SIZE;
     }
 
-    public Hand addCard(Card card) {
-        if (cards().size() >= HAND_SIZE) {
+    public void addCard(Card card) {
+        if (cards.size() >= HAND_SIZE) {
             throw new IllegalStateException("hand can only hold a maximum of six cards");
         }
 
-        var cards = Lib.listWithElem(cards(), card);
-        return withCards(cards);
+        cards.add(card);
     }
 
-    public Pair<Optional<Card>, Hand> swapCard(Card newCard, int index) {
-        var cards = new ArrayList<>(cards());
-        var oldCard = Optional.ofNullable(cards.get(index));
+    public Card swapCard(Card newCard, int index) {
+        var oldCard = cards.get(index);
         cards.set(index, newCard);
-
-        var hand = withCards(cards);
-        return Pair.of(oldCard, hand);
-    }
-
-    public Hand withCards(List<Card> cards) {
-        return new Hand(cards, uncovered);
-    }
-
-    public Hand withUncovered(Set<Integer> uncovered) {
-        return new Hand(cards, uncovered);
+        return oldCard;
     }
 
     public int visibleScore() {
@@ -116,5 +108,30 @@ public record Hand(List<Card> cards,
 //        return score;
         return 0;
     }
-}
 
+    public List<Card> cards() { return cards; }
+
+    public Set<Integer> uncovered() { return uncovered; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Hand hand = (Hand) o;
+        return Iterables.elementsEqual(cards, hand.cards)
+                && Iterables.elementsEqual(uncovered, hand.uncovered);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cards, uncovered);
+    }
+
+    @Override
+    public String toString() {
+        return "Hand{" +
+                "cards=" + cards +
+                ", uncovered=" + uncovered +
+                '}';
+    }
+}

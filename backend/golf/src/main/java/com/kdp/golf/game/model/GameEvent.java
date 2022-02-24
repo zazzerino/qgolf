@@ -10,11 +10,11 @@ public interface GameEvent {
     Long playerId();
 
     enum Type {
-        Uncover,
-        TakeFromDeck,
-        TakeFromTable,
-        SwapCard,
-        Discard,
+        UNCOVER,
+        TAKE_FROM_DECK,
+        TAKE_FROM_TABLE,
+        SWAP_CARD,
+        DISCARD,
     }
 
     record Uncover(Long gameId,
@@ -22,7 +22,7 @@ public interface GameEvent {
                    int handIndex) implements GameEvent {
         @Override
         public Type type() {
-            return Type.Uncover;
+            return Type.UNCOVER;
         }
     }
 
@@ -30,7 +30,7 @@ public interface GameEvent {
                         Long playerId) implements GameEvent {
         @Override
         public Type type() {
-            return Type.TakeFromDeck;
+            return Type.TAKE_FROM_DECK;
         }
     }
 
@@ -38,7 +38,7 @@ public interface GameEvent {
                          Long playerId) implements GameEvent {
         @Override
         public Type type() {
-            return Type.TakeFromTable;
+            return Type.TAKE_FROM_TABLE;
         }
     }
 
@@ -47,7 +47,7 @@ public interface GameEvent {
                     int handIndex) implements GameEvent {
         @Override
         public Type type() {
-            return Type.SwapCard;
+            return Type.SWAP_CARD;
         }
     }
 
@@ -55,7 +55,7 @@ public interface GameEvent {
                        Long playerId) implements GameEvent {
         @Override
         public Type type() {
-            return Type.Discard;
+            return Type.DISCARD;
         }
     }
 }

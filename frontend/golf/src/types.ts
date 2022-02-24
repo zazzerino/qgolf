@@ -9,38 +9,36 @@ export interface User {
 }
 
 export type GameState =
-  | 'Init'
-  | 'UncoverTwo'
-  | 'Take'
-  | 'Discard'
-  | 'Uncover'
-  | 'FinalTake'
-  | 'FinalDiscard'
-  | 'GameOver'
+  | 'INIT'
+  | 'UNCOVER_TWO'
+  | 'TAKE'
+  | 'DISCARD'
+  | 'UNCOVER'
+  | 'GAME_OVER'
   ;
 
 export type CardName = string;
 
 export type CardLocation =
-  | 'Deck'
-  | 'Table'
-  | 'Held'
-  | 'Hand0'
-  | 'Hand1'
-  | 'Hand2'
-  | 'Hand3'
-  | 'Hand4'
-  | 'Hand5'
+  | 'DECK'
+  | 'TABLE'
+  | 'HELD'
+  | 'HAND_0'
+  | 'HAND_1'
+  | 'HAND_2'
+  | 'HAND_3'
+  | 'HAND_4'
+  | 'HAND_5'
   ;
 
-export type HandPosition = 'Bottom' | 'Left' | 'Top' | 'Right';
+export type HandPosition = 'BOTTOM' | 'LEFT' | 'TOP' | 'RIGHT';
 
 export interface Player {
   id: number;
   name: string;
   handPosition: HandPosition;
   cards: CardName[];
-  uncoveredCards: number[];
+  uncovered: number[];
   heldCard?: CardName;
   score: number;
 }

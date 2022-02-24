@@ -1,6 +1,6 @@
 package com.kdp.golf.game.model;
 
-import com.kdp.golf.lib.Pair;
+import com.google.common.collect.Iterables;
 
 import java.util.*;
 
@@ -8,29 +8,14 @@ public class Deck {
 
     private Deque<Card> cards;
 
-    public static List<Card> cardList() {
-        var suits = Card.Suit.values();
-        var ranks = Card.Rank.values();
-        var cards = new ArrayDeque<Card>();
-
-        for (var suit : suits) {
-            for (var rank : ranks) {
-                var card = new Card(rank, suit);
-                cards.add(card);
-            }
-        }
-
-        return cards;
-    }
-
-    public Deck(Deque<Card> cards) {
-        this.cards = cards;
+    public Deck(Collection<Card> cards) {
+        this.cards = new ArrayDeque<>(cards);
     }
 
     public static Deck create(int deckCount) {
         assert deckCount > 0;
-        var cardList = cardList();
-        var cards = new ArrayList<>(cardList);
+        var cardList = enumerateCards();
+        var cards = new ArrayDeque<>(cardList);
 
         for (var i = 1; i < deckCount; i++) {
             cards.addAll(cardList);
@@ -39,69 +24,55 @@ public class Deck {
         return new Deck(cards);
     }
 
-//    public Deck shuffle() {
-//        var cards = new ArrayList<>(cards());
-//        Collections.shuffle(cards);
-//        return new Deck(cards);
-//    }
-//
-//    public Pair<Optional<Card>, Deck> deal() {
-//        try {
-//            var cardDeque = new ArrayDeque<>(cards());
-//            var card = Optional.of(cardDeque.pop());
-//            var cardList = List.copyOf(cardDeque);
-//            var deck = new Deck(cardList);
-//            return Pair.of(card, deck);
-//        } catch (NoSuchElementException _e) {
-//            return Pair.of(Optional.empty(), this);
-//        }
-//    }
-}
+    public static Collection<Card> enumerateCards() {
+        var suits = Card.Suit.values();
+        var ranks = Card.Rank.values();
+        var cards = new ArrayDeque<Card>();
 
-//public record Deck(List<Card> cards) {
-//
-//    public static List<Card> cardList() {
-//        var suits = Card.Suit.values();
-//        var ranks = Card.Rank.values();
-//        var cards = new ArrayList<Card>();
-//
-//        for (var suit : suits) {
-//            for (var rank : ranks) {
-//                var card = new Card(rank, suit);
-//                cards.add(card);
-//            }
-//        }
-//
-//        return cards;
-//    }
-//
-//    public static Deck create(int deckCount) {
-//        assert deckCount > 0;
-//        var cardList = cardList();
-//        var cards = new ArrayList<>(cardList);
-//
-//        for (var i = 1; i < deckCount; i++) {
-//            cards.addAll(cardList);
-//        }
-//
-//        return new Deck(cards);
-//    }
-//
-//    public Deck shuffle() {
-//        var cards = new ArrayList<>(cards());
-//        Collections.shuffle(cards);
-//        return new Deck(cards);
-//    }
-//
-//    public Pair<Optional<Card>, Deck> deal() {
-//        try {
-//            var cardDeque = new ArrayDeque<>(cards());
-//            var card = Optional.of(cardDeque.pop());
-//            var cardList = List.copyOf(cardDeque);
-//            var deck = new Deck(cardList);
-//            return Pair.of(card, deck);
-//        } catch (NoSuchElementException _e) {
-//            return Pair.of(Optional.empty(), this);
-//        }
-//    }
-//}
+        for (var suit : suits) {
+            for (var rank : ranks) {
+                var card = new Card(rank, suit);
+                cards.push(card);
+            }
+        }
+
+        return cards;
+    }
+
+    public void shuffle() {
+        var cardList = new ArrayList<>(cards);
+        Collections.shuffle(cardList);
+        cards = new ArrayDeque<>(cardList);
+    }
+
+    public Optional<Card> deal() {
+        try {
+            var card = cards.pop();
+            return Optional.of(card);
+        } catch (NoSuchElementException _e) {
+            return Optional.empty();
+        }
+    }
+
+    public Collection<Card> cards() { return cards; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Deck deck = (Deck) o;
+        return Iterables.elementsEqual(cards, deck.cards);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cards);
+    }
+
+    @Override
+    public String toString() {
+        return "Deck{" +
+                "cards=" + cards +
+                '}';
+    }
+}

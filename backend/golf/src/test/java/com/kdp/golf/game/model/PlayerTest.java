@@ -10,7 +10,7 @@ class PlayerTest {
     void giveCard() {
         var card = Card.from("AS");
         var player = Player.create(0L, "Toots");
-        player = player.giveCard(card);
+        player.giveCard(card);
 
         assertEquals(1, player.hand().cards().size());
     }
@@ -19,8 +19,8 @@ class PlayerTest {
     void uncover() {
         var card = Card.from("AS");
         var player = Player.create(0L, "Mariah");
-        player = player.giveCard(card);
-        player = player.uncoverCard(0);
+        player.giveCard(card);
+        player.uncoverCard(0);
 
         assertTrue(player.hand()
                 .uncovered()
@@ -31,7 +31,7 @@ class PlayerTest {
     void hold() {
         var card = Card.from("KH");
         var player = Player.create(0L, "Toots");
-        player = player.holdCard(card);
+        player.holdCard(card);
 
         assertEquals(card, player.heldCard().orElseThrow());
     }
@@ -40,16 +40,20 @@ class PlayerTest {
     void discard() {
         var card = Card.from("KH");
         var player = Player.create(0L, "Mariah");
-        player = player.holdCard(card);
+        player.holdCard(card);
 
         assertTrue(player.heldCard().isPresent());
         assertEquals(card, player.heldCard().get());
 
-        var pair = player.discardHeldCard();
-        var discardedCard = pair.a().orElseThrow();
-        player = pair.b();
-
+        var discardedCard = player.discard();
         assertTrue(player.heldCard().isEmpty());
         assertNotNull(discardedCard);
+    }
+
+    @Test
+    void equals() {
+        var player0 = Player.create(0L, "Toots");
+        var player1 = Player.create(0L, "Toots");
+        assertEquals(player0, player1);
     }
 }

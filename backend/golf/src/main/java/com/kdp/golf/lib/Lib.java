@@ -53,22 +53,36 @@ public class Lib {
                 : Optional.of(index);
     }
 
-    public static <K, V> ImmutableMap<K, V> updateMap(Map<K, V> map, Map<K, V> changes) {
+    public static <K, V> Map<K, V> updateMap(Map<K, V> map, Map<K, V> changes) {
         return ImmutableMap.<K, V>builder()
                 .putAll(Maps.difference(map, changes).entriesOnlyOnLeft())
                 .putAll(changes)
                 .build();
     }
 
-    public static <T> List<T> listWithElem(List<T> list, T elem) {
-        var copy = new ArrayList<>(list);
-        copy.add(elem);
-        return copy;
-    }
+//    public static <T> List<T> listWithElem(List<T> list, T elem) {
+//        var copy = new ArrayList<>(list);
+//        copy.add(elem);
+//        return copy;
+//    }
+//
+//    public static <T> Set<T> setWithElem(Set<T> set, T elem) {
+//        var copy = new HashSet<>(set);
+//        copy.add(elem);
+//        return copy;
+//    }
 
-    public static <T> Set<T> setWithElem(Set<T> set, T elem) {
-        var copy = new HashSet<>(set);
-        copy.add(elem);
-        return copy;
+    /**
+     * Takes the first element of `lhm` and moves it to the end.
+     */
+    public static <K, V> void cycleLinkedHashMap(LinkedHashMap<K, V> lhm) {
+        if (lhm.isEmpty()) return;
+
+        var firstEntry = lhm.entrySet().stream().findFirst().orElseThrow();
+        var key = firstEntry.getKey();
+        var val = firstEntry.getValue();
+
+        lhm.remove(key);
+        lhm.put(key, val);
     }
 }

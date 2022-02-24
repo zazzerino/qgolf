@@ -24,23 +24,29 @@ class DeckTest {
         var deck = Deck.create(1);
         assertEquals(DECK_SIZE, deck.cards().size());
 
-        var pair = deck.deal();
-        var card = pair.a().orElseThrow();
-        var newDeck = pair.b();
-
+        var card = deck.deal().orElseThrow();
         assertNotNull(card);
-        assertEquals(deck.cards().size() - 1, newDeck.cards().size());
+        assertEquals(DECK_SIZE - 1, deck.cards().size());
     }
 
     @Test
     void shuffle() {
         var deck0 = Deck.create(1);
-        var card0 = deck0.cards().get(0);
+        var card0 = deck0.cards().stream().findFirst();
 
         var deck1 = Deck.create(1);
-        var card1 = deck1.cards().get(0);
+        var card1 = deck1.cards().stream().findFirst();
 
         assertEquals(card0, card1);
         deck1.shuffle();
+    }
+
+    @Test
+    void equals() {
+        var deck = Deck.create(1);
+        var deck2 = Deck.create(1);
+
+        assertEquals(deck, deck);
+        assertEquals(deck, deck2);
     }
 }

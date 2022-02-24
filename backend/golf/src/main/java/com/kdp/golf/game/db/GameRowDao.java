@@ -16,17 +16,17 @@ public interface GameRowDao {
 
     @SqlUpdate("""
         INSERT INTO game
-        (host, state, turn, deck, table_cards, player_order, final_turn)
+        (host, state, turn, final_turn, deck, table_cards, players)
         VALUES
-        (:host, :state, :turn, :deck, :tableCards, :playerOrder, :finalTurn)""")
+        (:host, :state, :turn, :finalTurn, :deck, :tableCards, :players)""")
     @GetGeneratedKeys("id")
     Long create(@BindMethods GameRow gameRow);
 
     @SqlUpdate("""
         UPDATE game
         SET
-        host = :host, state = :state, turn = :turn, deck = :deck, table_cards = :tableCards,
-        player_order = :playerOrder, final_turn = :finalTurn
+        host = :host, state = :state, turn = :turn, final_turn = :finalTurn,
+        deck = :deck, table_cards = :tableCards, players = :players
         WHERE id = :id""")
     void update(@BindMethods GameRow gameRow);
 

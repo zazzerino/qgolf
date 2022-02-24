@@ -6,106 +6,80 @@ import org.jdbi.v3.core.statement.StatementContext;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toCollection;
 
 public record GameRow(Long id,
                       Long host,
                       String state,
                       int turn,
+                      boolean finalTurn,
                       List<String> deck,
                       List<String> tableCards,
-                      List<Long> playerOrder,
-                      boolean finalTurn) {
+                      List<Long> players) {
     
-    public static GameRow create(Player host) {
-        var hostId = host.id();
-        var deck = Deck.create(Game.DECK_COUNT)
-                .cards()
+    public static GameRow from(Game g) {
+        var state = g.state().toString();
+        var deck = g.deck().cards()
                 .stream()
                 .map(Card::name)
                 .toList();
-        
+
+        var tableCards = g.tableCards()
+                .stream()
+                .map(Card::name)
+                .toList();
+
+        var players = g.players()
+                .stream()
+                .map(Player::id)
+                .toList();
+
         return new GameRow(
-                null,
-                hostId,
-                Game.State.Init.toString(),
-                0,
+                g.id(),
+                g.hostId(),
+                state,
+                g.turn(),
+                g.isFinalTurn(),
                 deck,
-                List.of(),
-                List.of(hostId),
-                false);
-    }
-
-    public static GameRow from(Game game) {
-        var state = game.state().toString();
-
-        var deck = game.deck().cards()
-                .stream()
-                .map(Card::name)
-                .toList();
-
-        var tableCards = game.tableCards()
-                .stream()
-                .map(Card::name)
-                .toList();
-
-//        return new GameRow(
-//                game.id(),
-//                game.hostId(),
-//                state,
-//                game.turn(),
-//                deck,
-//                tableCards,
-//                game.playerOrder(),
-//                game.isFinalTurn());
-        return null;
+                tableCards,
+                players);
     }
 
     public Game toGame(List<Player> players) {
+        var state = Game.State.valueOf(state());
         var deckCards = deck.stream()
                 .map(Card::from)
-                .toList();
+                .collect(toCollection(ArrayDeque::new));
 
         var deck = new Deck(deckCards);
-
         var tableCards = tableCards().stream()
                 .map(Card::from)
-                .toList();
+                .collect(toCollection(ArrayDeque::new));
 
+        assert players().equals(players.stream().map(Player::id).toList());
         var playerMap = players.stream()
                 .collect(Collectors.toMap(
                         Player::id,
-                        Function.identity()));
+                        Function.identity(),
+                        (prev, next) -> next,
+                        LinkedHashMap::new));
 
-//        return ImmutableGame.builder()
-//                .id(id)
-//                .hostId(host())
-//                .state(Game.State.valueOf(state()))
-//                .turn(turn)
-//                .deck(deck)
-//                .tableCards(tableCards)
-//                .players(playerMap)
-//                .playerOrder(playerOrder)
-//                .isFinalTurn(finalTurn)
-//                .build();
-        return null;
-    }
-    
-    public GameRow withId(Long id) {
-        return new GameRow(
-                id, host, state, turn, deck, tableCards, playerOrder, finalTurn);
+        return new Game(id, host, state, turn, finalTurn, deck, tableCards, playerMap);
     }
 
     public static class Mapper implements RowMapper<GameRow> {
+
         @Override
         public GameRow map(ResultSet rs, StatementContext ctx) throws SQLException {
             var id = rs.getLong("id");
             var host = rs.getLong("host");
             var state = rs.getString("state");
             var turn = rs.getInt("turn");
+            var isFinalTurn = rs.getBoolean("final_turn");
 
             var deck = Arrays.asList(
                     (String []) rs.getArray("deck").getArray());
@@ -113,11 +87,10 @@ public record GameRow(Long id,
             var tableCards = Arrays.asList(
                     (String []) rs.getArray("table_cards").getArray());
 
-            var playerOrder = Arrays.asList(
-                    (Long []) rs.getArray("player_order").getArray());
+            var players = Arrays.asList(
+                    (Long []) rs.getArray("players").getArray());
 
-            var isFinalTurn = rs.getBoolean("final_turn");
-            return new GameRow(id, host, state, turn, deck, tableCards, playerOrder, isFinalTurn);
+            return new GameRow(id, host, state, turn, isFinalTurn, deck, tableCards, players);
         }
     }
 }
