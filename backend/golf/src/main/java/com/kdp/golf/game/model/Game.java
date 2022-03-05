@@ -78,11 +78,11 @@ public class Game {
         }
     }
 
-    public void shuffleDeck() {
+    private void shuffleDeck() {
         deck.shuffle();
     }
 
-    public void dealStartingHands() {
+    private void dealStartingHands() {
         for (int i = 0; i < Hand.HAND_SIZE; i++) {
             for (var player : players.values()) {
                 var card = deck.deal().orElseThrow();
@@ -91,7 +91,7 @@ public class Game {
         }
     }
 
-    public void dealTableCard() {
+    private void dealTableCard() {
         var card = deck.deal().orElseThrow();
         tableCards.push(card);
     }
@@ -128,10 +128,10 @@ public class Game {
         }
 
         throw new IllegalStateException(
-                "Unexpected value. state: " + state() + " event: " + event);
+                "unexpected value. state: " + state() + " event: " + event);
     }
 
-    public void uncoverTwo(Player p, int handIndex) {
+    private void uncoverTwo(Player p, int handIndex) {
         if (p.stillUncoveringTwo()) {
             p.uncoverCard(handIndex);
         } else return;
@@ -143,39 +143,40 @@ public class Game {
         if (allReady) {
             state = State.TAKE;
             ++turn;
-            nextPlayer();
         }
     }
 
-    public void uncover(Player p, int handIndex) {
-        p.uncoverCard(handIndex);
-        ++turn;
-        nextPlayer();
-    }
-
-    public void takeFromDeck(Player p) {
+    private void takeFromDeck(Player p) {
         var card = deck.deal().orElseThrow();
         p.holdCard(card);
         state = State.DISCARD;
     }
 
-    public void takeFromTable(Player p) {
+    private void takeFromTable(Player p) {
         var card = tableCards.pop();
         p.holdCard(card);
         state = State.DISCARD;
     }
 
-    public void discard(Player p) {
+    private void discard(Player p) {
         var card = p.discard();
         tableCards.push(card);
     }
 
-    public void swapCard(Player p, int handIndex) {
-        var card = p.swapCard(handIndex);
-        tableCards.push(card);
+    private void uncover(Player p, int handIndex) {
+        p.uncoverCard(handIndex);
+        ++turn;
+        nextPlayer();
     }
 
-    public boolean playerCanAct(Player p) {
+    private void swapCard(Player p, int handIndex) {
+        var card = p.swapCard(handIndex);
+        tableCards.push(card);
+        ++turn;
+        nextPlayer();
+    }
+
+    private boolean playerCanAct(Player p) {
         return playerTurn().equals(p.id())
                 || (state == State.UNCOVER_TWO && p.stillUncoveringTwo());
     }
@@ -184,10 +185,10 @@ public class Game {
      * @return the player ids from `playerId` counterclockwise around the table
      */
     public List<Long> playerOrderFrom(Long playerId) {
-        var keys = new ArrayList<>(players.keySet());
-        var index = Lib.findIndex(keys, playerId).orElseThrow();
-        Collections.rotate(keys, -index);
-        return keys;
+        var playerIds = new ArrayList<>(players.keySet());
+        var index = Lib.findIndex(playerIds, playerId).orElseThrow();
+        Collections.rotate(playerIds, -index);
+        return playerIds;
     }
 
     /**
@@ -215,7 +216,7 @@ public class Game {
                 .orElseThrow();
     }
 
-    public void nextPlayer() {
+    private void nextPlayer() {
         Lib.cycleLinkedHashMap(players);
     }
 

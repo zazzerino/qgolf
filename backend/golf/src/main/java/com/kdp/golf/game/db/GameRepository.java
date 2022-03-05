@@ -24,10 +24,7 @@ public class GameRepository {
 
     public Optional<Game> findById(Long id) {
         var gameRow = gameRowDao.findById(id);
-
-        if (gameRow.isEmpty()) {
-            return Optional.empty();
-        }
+        if (gameRow.isEmpty()) return Optional.empty();
 
         var players = playerRowDao.findPlayers(id)
                 .stream()

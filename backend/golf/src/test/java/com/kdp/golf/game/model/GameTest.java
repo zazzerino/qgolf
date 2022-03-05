@@ -46,25 +46,25 @@ class GameTest {
         assertEquals(2, game.players().size());
     }
 
-    @Test
-    public void dealStartingHands() {
-        var host = Player.create(0L, "Charlie");
-        var player2 = Player.create(1L, "Dee");
+//    @Test
+//    public void dealStartingHands() {
+//        var host = Player.create(0L, "Charlie");
+//        var player2 = Player.create(1L, "Dee");
+//
+//        var game = Game.create(0L, host);
+//        game.addPlayer(player2);
+//        game.dealStartingHands();
+//
+//        System.out.println(game);
+//    }
 
-        var game = Game.create(0L, host);
-        game.addPlayer(player2);
-        game.dealStartingHands();
-
-        System.out.println(game);
-    }
-
-    @Test
-    public void dealTableCard() {
-        var host = Player.create(0L, "Charlie");
-        var game = Game.create(0L, host);
-        game.dealTableCard();
-        assertEquals(1, game.tableCards().size());
-    }
+//    @Test
+//    public void dealTableCard() {
+//        var host = Player.create(0L, "Charlie");
+//        var game = Game.create(0L, host);
+//        game.dealTableCard();
+//        assertEquals(1, game.tableCards().size());
+//    }
 
     @Test
     public void start() {
@@ -74,12 +74,12 @@ class GameTest {
         System.out.println(game);
     }
 
-    @Test
-    void uncoverCard() {
-        var host = Player.create(0L, "Artemis");
-        var game = Game.create(0L, host);
-        game.start();
-        game.uncover(host, 0);
-        System.out.println(game);
-    }
+//    @Test
+//    void uncoverCard() {
+//        var host = Player.create(0L, "Artemis");
+//        var game = Game.create(0L, host);
+//        game.start();
+//        game.uncover(host, 0);
+//        System.out.println(game);
+//    }
 }

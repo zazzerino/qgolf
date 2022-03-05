@@ -22,7 +22,6 @@ public record GameRow(Long id,
                       List<Long> players) {
     
     public static GameRow from(Game g) {
-        var state = g.state().toString();
         var deck = g.deck().cards()
                 .stream()
                 .map(Card::name)
@@ -41,7 +40,7 @@ public record GameRow(Long id,
         return new GameRow(
                 g.id(),
                 g.hostId(),
-                state,
+                g.state().toString(),
                 g.turn(),
                 g.isFinalTurn(),
                 deck,
