@@ -21,7 +21,9 @@ public enum CardLocation {
             CardLocation.HAND_4,
             CardLocation.HAND_5);
 
-    public static final List<CardLocation> TAKE_LOCATIONS = List.of(CardLocation.DECK, CardLocation.TABLE);
+    public static final List<CardLocation> TAKE_LOCATIONS = List.of(
+            CardLocation.DECK,
+            CardLocation.TABLE);
 
     public static final List<CardLocation> DISCARD_LOCATIONS = List.of(
             CardLocation.HELD,

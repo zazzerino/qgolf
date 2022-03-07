@@ -42,10 +42,8 @@ public class UserService {
 
     @Transactional
     public User updateName(Long userId, String name) {
-        var user = userDao.findById(userId)
-                .map(u -> u.withName(name))
-                .orElseThrow();
-
+        var user = userDao.findById(userId).orElseThrow();
+        user.setName(name);
         userDao.update(user);
         return user;
     }

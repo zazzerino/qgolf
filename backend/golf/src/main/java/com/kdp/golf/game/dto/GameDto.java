@@ -21,14 +21,14 @@ public record GameDto(Long id,
         var playableCards = g.playableCards(userPlayer);
 
         var playerCount = g.players().size();
-        var handPositions = HandPosition.positions(playerCount);
+        var positions = HandPosition.positions(playerCount);
         var playerOrder = g.playerOrderFrom(userId);
         var playerDtos = new ArrayList<PlayerDto>();
 
         for (var i = 0; i < playerCount; i++) {
             var id = playerOrder.get(i);
             var player = g.getPlayer(id).orElseThrow();
-            var handPos = handPositions.get(i);
+            var handPos = positions.get(i);
             var dto = PlayerDto.from(player, handPos);
             playerDtos.add(dto);
         }

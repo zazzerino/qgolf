@@ -1,30 +1,57 @@
 package com.kdp.golf.user;
 
-import org.jdbi.v3.core.mapper.RowMapper;
-import org.jdbi.v3.core.statement.StatementContext;
+import com.google.common.base.Objects;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+public class User {
 
-public record User(Long id,
-                   String name,
-                   String sessionId) {
+    private final Long id;
+    private String name;
+    private final String sessionId;
 
     public static final String DEFAULT_NAME = "anon";
 
-    public User withName(String name) {
-        return new User(id, name, sessionId);
+    public User(Long id, String name, String sessionId) {
+        this.id = id;
+        this.name = name;
+        this.sessionId = sessionId;
     }
 
-    public static class Mapper implements RowMapper<User> {
+    public Long id() {
+        return id;
+    }
 
-        @Override
-        public User map(ResultSet rs, StatementContext ctx) throws SQLException {
-            var id = rs.getLong("id");
-            var name = rs.getString("name");
-            var sessionId = rs.getString("session_id");
+    public String name() {
+        return name;
+    }
 
-            return new User(id, name, sessionId);
-        }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String sessionId() {
+        return sessionId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equal(id, user.id)
+                && Objects.equal(name, user.name)
+                && Objects.equal(sessionId, user.sessionId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id, name, sessionId);
+    }
+
+    @Override
+    public String toString() {
+        return "User[" +
+                "id=" + id + ", " +
+                "name=" + name + ", " +
+                "sessionId=" + sessionId + ']';
     }
 }

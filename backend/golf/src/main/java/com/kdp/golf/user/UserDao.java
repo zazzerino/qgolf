@@ -11,11 +11,11 @@ import java.util.Optional;
 public interface UserDao {
 
     @SqlQuery("SELECT * FROM person WHERE id = ?")
-    @RegisterRowMapper(User.Mapper.class)
+    @RegisterRowMapper(UserMapper.class)
     Optional<User> findById(Long id);
 
     @SqlQuery("SELECT * FROM person WHERE session_id = ?")
-    @RegisterRowMapper(User.Mapper.class)
+    @RegisterRowMapper(UserMapper.class)
     Optional<User> findBySessionId(String sessionId);
 
     @SqlUpdate("INSERT INTO person (name, session_id) VALUES (?, ?)")

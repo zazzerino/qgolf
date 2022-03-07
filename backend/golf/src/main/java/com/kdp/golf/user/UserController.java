@@ -22,13 +22,17 @@ public class UserController {
     public void connect(Session session) {
         var user = userService.createUser(session.getId());
         log.info("user created: " + user);
-        webSocket.sendToSession(session, new Response.User(user));
+        var userDto = UserDto.from(user);
+        var response = new Response.User(userDto);
+        webSocket.sendToSession(session, response);
     }
 
     public void updateName(Session session, String newName) {
         var id = userService.findUserId(session.getId()).orElseThrow();
         var user = userService.updateName(id, newName);
-        webSocket.sendToSession(session, new Response.User(user));
+        var userDto = UserDto.from(user);
+        var response = new Response.User(userDto);
+        webSocket.sendToSession(session, response);
     }
 
     public void disconnect(String sessionId) {

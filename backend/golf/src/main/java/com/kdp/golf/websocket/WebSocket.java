@@ -1,5 +1,6 @@
 package com.kdp.golf.websocket;
 
+import com.kdp.golf.game.GameController;
 import com.kdp.golf.user.UserController;
 import org.jboss.logging.Logger;
 
@@ -20,12 +21,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WebSocket {
 
     private final Map<String, Session> sessions = new ConcurrentHashMap<>();
+    private final UserController userController;
+    private final GameController gameController;
     private final Logger log = Logger.getLogger(WebSocket.class);
 
-    private final UserController userController;
-
-    public WebSocket(UserController userController) {
+    public WebSocket(UserController userController, GameController gameController) {
         this.userController = userController;
+        this.gameController = gameController;
     }
 
     @OnOpen
@@ -47,6 +49,32 @@ public class WebSocket {
     @OnMessage
     public void onMessage(Session session, Message message) {
         log.info("message received: " + message);
+
+        switch (message.type()) {
+            case UpdateName:
+                handleUpdateName(session, message);
+                break;
+            case CreateGame:
+                handleCreateGame(session);
+                break;
+//            case JoinGame:
+//                break;
+//            case StartGame:
+//                break;
+//            case GameEvent:
+//                break;
+//            case Chat:
+//                break;
+        }
+    }
+
+    private void handleUpdateName(Session session, Message message) {
+        var m = (Message.UpdateName) message;
+        userController.updateName(session, m.name());
+    }
+
+    private void handleCreateGame(Session session) {
+        gameController.createGame(session);
     }
 
     @OnError
