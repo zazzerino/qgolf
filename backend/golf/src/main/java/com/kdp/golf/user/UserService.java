@@ -33,6 +33,11 @@ public class UserService {
                 .map(User::name);
     }
 
+    public Optional<String> findSessionId(Long userId) {
+        return findById(userId)
+                .map(User::sessionId);
+    }
+
     @Transactional
     public User createUser(String sessionId) {
         var name = User.DEFAULT_NAME;

@@ -9,7 +9,7 @@ import {initWebsocket} from "./websocket";
 
 function App() {
   const [state, dispatch] = useReducer(rootReducer, INITIAL_STATE);
-  const {user} = state;
+  const {user, game} = state;
 
   useEffect(() => {
     initWebsocket(dispatch);
@@ -22,7 +22,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/user" element={<UserPage user={user} />} />
-          <Route path="/game" element={<GamePage user={user} />} />
+          <Route path="/game" element={<GamePage user={user} game={game} />} />
         </Routes>
       </BrowserRouter>
     </div>

@@ -1,14 +1,16 @@
 package com.kdp.golf.websocket;
 
 import com.kdp.golf.game.GameController;
+import com.kdp.golf.game.dto.GameDto;
+import com.kdp.golf.game.model.Game;
 import com.kdp.golf.user.UserController;
+import com.kdp.golf.user.UserService;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.websocket.*;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,12 +22,16 @@ import java.util.concurrent.ConcurrentHashMap;
 )
 public class WebSocket {
 
-    private final Map<String, Session> sessions = new ConcurrentHashMap<>();
+    private final UserService userService;
     private final UserController userController;
     private final GameController gameController;
+    private final Map<String, Session> sessions = new ConcurrentHashMap<>();
     private final Logger log = Logger.getLogger(WebSocket.class);
 
-    public WebSocket(UserController userController, GameController gameController) {
+    public WebSocket(UserService userService,
+                     UserController userController,
+                     GameController gameController) {
+        this.userService = userService;
         this.userController = userController;
         this.gameController = gameController;
     }
@@ -51,30 +57,10 @@ public class WebSocket {
         log.info("message received: " + message);
 
         switch (message.type()) {
-            case UpdateName:
-                handleUpdateName(session, message);
-                break;
-            case CreateGame:
-                handleCreateGame(session);
-                break;
-//            case JoinGame:
-//                break;
-//            case StartGame:
-//                break;
-//            case GameEvent:
-//                break;
-//            case Chat:
-//                break;
+            case UpdateName -> handleUpdateName(session, (Message.UpdateName) message);
+            case CreateGame -> handleCreateGame(session);
+            case StartGame -> handleStartGame(session, (Message.StartGame) message);
         }
-    }
-
-    private void handleUpdateName(Session session, Message message) {
-        var m = (Message.UpdateName) message;
-        userController.updateName(session, m.name());
-    }
-
-    private void handleCreateGame(Session session) {
-        gameController.createGame(session);
     }
 
     @OnError
@@ -95,13 +81,34 @@ public class WebSocket {
         sendToSession(sessions.get(sessionId), response);
     }
 
-    public void sendToSessionIds(Collection<String> sessionIds, Response response) {
-        sessionIds.forEach(
-                id -> sendToSessionId(id, response));
+    public void updatePlayers(Game game) {
+        for (var player : game.players()) {
+            var pid = player.id();
+            var sessionId = userService.findSessionId(pid).orElseThrow();
+            var gameDto = GameDto.from(game, pid);
+            var response = new Response.Game(gameDto);
+            sendToSessionId(sessionId, response);
+        }
     }
 
-    public void broadcast(Response response) {
-        sessions.values()
-                .forEach(s -> sendToSession(s, response));
+    private void handleUpdateName(Session session, Message.UpdateName message) {
+        userController.updateName(session, message.name());
     }
+
+    private void handleCreateGame(Session session) {
+        gameController.createGame(session);
+    }
+
+    private void handleStartGame(Session session, Message.StartGame message) {
+        gameController.startGame(session, message.gameId());
+    }
+
+//    public void sendToSessionIds(Collection<String> sessionIds, Response response) {
+//        sessionIds.forEach(id -> sendToSessionId(id, response));
+//    }
+
+//    public void broadcast(Response response) {
+//        sessions.values()
+//                .forEach(s -> sendToSession(s, response));
+//    }
 }

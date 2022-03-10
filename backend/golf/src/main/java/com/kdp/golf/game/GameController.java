@@ -1,6 +1,7 @@
 package com.kdp.golf.game;
 
 import com.kdp.golf.game.dto.GameDto;
+import com.kdp.golf.game.model.Game;
 import com.kdp.golf.user.UserService;
 import com.kdp.golf.websocket.Response;
 import com.kdp.golf.websocket.WebSocket;
@@ -30,5 +31,12 @@ public class GameController {
         var gameDto = GameDto.from(game, userId);
         var response = new Response.Game(gameDto);
         webSocket.sendToSession(session, response);
+    }
+
+    public void startGame(Session session, Long gameId) {
+        var userId = userService.findUserId(session.getId()).orElseThrow();
+        var game = gameService.startGame(gameId, userId);
+        log.info("game started: " + game);
+        webSocket.updatePlayers(game);
     }
 }

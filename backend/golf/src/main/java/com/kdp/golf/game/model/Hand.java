@@ -17,7 +17,9 @@ public class Hand {
     }
 
     public static Hand empty() {
-        return new Hand(List.of(), Set.of());
+        return new Hand(
+                Collections.emptyList(),
+                Collections.emptySet());
     }
 
     public void uncover(int index) {

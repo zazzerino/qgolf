@@ -53,7 +53,7 @@ public class Game {
         var turn = 0;
         var finalTurn = false;
         var deck = Deck.create(DECK_COUNT);
-        var tableCards = List.<Card>of();
+        var tableCards = Collections.<Card>emptyList();
 
         var players = new LinkedHashMap<Long, Player>();
         players.put(host.id(), host);
@@ -83,7 +83,7 @@ public class Game {
     }
 
     private void dealStartingHands() {
-        for (int i = 0; i < Hand.HAND_SIZE; i++) {
+        for (var i = 0; i < Hand.HAND_SIZE; i++) {
             for (var player : players.values()) {
                 var card = deck.deal().orElseThrow();
                 player.giveCard(card);
@@ -182,7 +182,7 @@ public class Game {
     }
 
     /**
-     * @return the player ids from `playerId` counterclockwise around the table
+     * @return the player ids starting from `playerId` clockwise around the table
      */
     public List<Long> playerOrderFrom(Long playerId) {
         var playerIds = new ArrayList<>(players.keySet());
@@ -201,7 +201,7 @@ public class Game {
             case UNCOVER_TWO, UNCOVER -> CardLocation.UNCOVER_LOCATIONS;
             case TAKE -> CardLocation.TAKE_LOCATIONS;
             case DISCARD -> CardLocation.DISCARD_LOCATIONS;
-            default -> List.of();
+            default -> Collections.emptyList();
         };
     }
 
