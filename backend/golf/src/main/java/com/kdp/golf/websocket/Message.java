@@ -10,8 +10,12 @@ public interface Message {
         CreateGame,
         JoinGame,
         StartGame,
-        GameEvent,
         Chat,
+        Uncover,
+        TakeFromDeck,
+        TakeFromTable,
+        SwapCard,
+        Discard,
     }
 
     record UpdateName(Long userId, String name) implements Message {
@@ -39,6 +43,20 @@ public interface Message {
         @Override
         public Type type() {
             return Type.StartGame;
+        }
+    }
+
+    record Uncover(Long userId, Long gameId, int handIndex) implements Message {
+        @Override
+        public Type type() {
+            return Type.Uncover;
+        }
+    }
+
+    record TakeFromDeck(Long userId, Long gameId) implements Message {
+        @Override
+        public Type type() {
+            return Type.TakeFromDeck;
         }
     }
 }

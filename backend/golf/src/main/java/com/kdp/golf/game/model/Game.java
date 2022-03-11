@@ -9,7 +9,8 @@ import java.util.*;
 
 public class Game {
 
-    private @Nullable Long id; // the id will be created by the database, so the initial object will have a null id
+    // the id will be created by the database, so the initial object will have a null id
+    private @Nullable Long id;
     private Long hostId;
     private State state;
     private int turn;
@@ -61,19 +62,19 @@ public class Game {
         return new Game(id, host.id(), state, turn, finalTurn, deck, tableCards, players);
     }
 
-    public void addPlayer(Player p) {
+    public void addPlayer(Player player) {
         if (players.size() >= MAX_PLAYERS) {
             throw new IllegalStateException("attempt to add more than MAX_PLAYERS");
         }
 
-        players.put(p.id(), p);
+        players.put(player.id(), player);
     }
 
-    public void removePlayer(Player p) {
-        players.remove(p.id());
+    public void removePlayer(Player player) {
+        players.remove(player.id());
 
-        // if the leaving player is the host, make the next player the host
-        if (Objects.equals(hostId, p.id())) {
+        // if the leaving player is the host, make the 2nd player to join the host
+        if (Objects.equals(hostId, player.id())) {
             hostId = players.keySet().stream().findFirst().orElseThrow();
         }
     }
@@ -127,13 +128,13 @@ public class Game {
             }
         }
 
-        throw new IllegalStateException(
-                "unexpected value. state: " + state() + " event: " + event);
+        var msg = "unexpected value. state: " + state + " event: " + event;
+        throw new IllegalStateException(msg);
     }
 
-    private void uncoverTwo(Player p, int handIndex) {
-        if (p.stillUncoveringTwo()) {
-            p.uncoverCard(handIndex);
+    private void uncoverTwo(Player player, int handIndex) {
+        if (player.stillUncoveringTwo()) {
+            player.uncoverCard(handIndex);
         } else return;
 
         var allReady = players.values()
@@ -146,39 +147,51 @@ public class Game {
         }
     }
 
-    private void takeFromDeck(Player p) {
+    private void uncover(Player player, int handIndex) {
+        player.uncoverCard(handIndex);
+        state = State.TAKE;
+        ++turn;
+        nextPlayer();
+    }
+
+    private void takeFromDeck(Player player) {
         var card = deck.deal().orElseThrow();
-        p.holdCard(card);
+        player.holdCard(card);
         state = State.DISCARD;
     }
 
-    private void takeFromTable(Player p) {
+    private void takeFromTable(Player player) {
         var card = tableCards.pop();
-        p.holdCard(card);
+        player.holdCard(card);
         state = State.DISCARD;
     }
 
-    private void discard(Player p) {
-        var card = p.discard();
+    private void discard(Player player) {
+        var card = player.discard();
         tableCards.push(card);
+
+        var hasOneCoveredCard = player.uncoveredCardCount() == Hand.HAND_SIZE - 1;
+
+        if (hasOneCoveredCard) {
+            state = State.TAKE;
+            turn++;
+        } else {
+            state = State.UNCOVER;
+        }
     }
 
-    private void uncover(Player p, int handIndex) {
-        p.uncoverCard(handIndex);
+    private void swapCard(Player player, int handIndex) {
+        var card = player.swapCard(handIndex);
+        tableCards.push(card);
         ++turn;
         nextPlayer();
     }
 
-    private void swapCard(Player p, int handIndex) {
-        var card = p.swapCard(handIndex);
-        tableCards.push(card);
-        ++turn;
-        nextPlayer();
-    }
-
-    private boolean playerCanAct(Player p) {
-        return playerTurn().equals(p.id())
-                || (state == State.UNCOVER_TWO && p.stillUncoveringTwo());
+    private boolean playerCanAct(Player player) {
+        var isPlayersTurn = playerTurn().equals(player.id());
+        // When the state is UNCOVER_TWO, any player can act.
+        var isUncoverTwo = state == State.UNCOVER_TWO && player.stillUncoveringTwo();
+        return isPlayersTurn || isUncoverTwo;
     }
 
     /**
@@ -192,10 +205,10 @@ public class Game {
     }
 
     /**
-     * @return the card locations that player `p` can interact with
+     * @return the card locations that `player` can interact with
      */
-    public List<CardLocation> playableCards(Player p) {
-        if (!playerCanAct(p)) return List.of();
+    public List<CardLocation> playableCards(Player player) {
+        if (!playerCanAct(player)) return Collections.emptyList();
 
         return switch (state) {
             case UNCOVER_TWO, UNCOVER -> CardLocation.UNCOVER_LOCATIONS;

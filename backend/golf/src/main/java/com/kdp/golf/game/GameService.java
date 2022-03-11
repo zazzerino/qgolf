@@ -2,6 +2,7 @@ package com.kdp.golf.game;
 
 import com.kdp.golf.game.db.GameRepository;
 import com.kdp.golf.game.model.Game;
+import com.kdp.golf.game.model.GameEvent;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -40,11 +41,20 @@ public class GameService {
         var game = gameRepository.findById(gameId).orElseThrow();
 
         if (!Objects.equals(game.hostId(), userId)) {
-            throw new IllegalStateException(
-                    "user " + userId + " attempted to start game " + gameId + " but they are not the host");
+            var msg = "user " + userId + " attempted to start game " + gameId + " but they are not the host";
+            throw new IllegalStateException(msg);
         }
 
         game.start();
+        gameRepository.update(game);
+        return game;
+    }
+
+    @Transactional
+    public Game handleEvent(GameEvent event) {
+        var id = event.gameId();
+        var game = gameRepository.findById(id).orElseThrow();
+        game.handleEvent(event);
         gameRepository.update(game);
         return game;
     }

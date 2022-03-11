@@ -8,19 +8,24 @@ function cardPath(name: string): string {
 }
 
 interface CardProps {
-  className: string;
-  name: string;
+  cardName: string;
   x: number;
   y: number;
+  className?: string;
+  onClick?: () => any;
 }
 
 export const Card = forwardRef<SVGImageElement, CardProps>(
   (props, ref) => {
-    const className = props.className || "Card";
-    const href = cardPath(props.name);
+    const href = cardPath(props.cardName);
     const width = "10%";
     const x = props.x - CARD_WIDTH / 2;
     const y = props.y - CARD_HEIGHT / 2;
+
+    let className = "Card";
+    if (props.className) {
+      className += " " + props.className;
+    }
 
     return (
       <image
@@ -30,6 +35,7 @@ export const Card = forwardRef<SVGImageElement, CardProps>(
         width={width}
         x={x}
         y={y}
+        onClick={props.onClick}
       />
     );
   });

@@ -4,7 +4,7 @@ import {
   CreateGameMessage,
   GameResponse,
   Message, Response,
-  StartGameMessage,
+  StartGameMessage, TakeFromDeckMessage, UncoverMessage,
   UpdateNameMessage,
   UserResponse
 } from "./types";
@@ -62,7 +62,7 @@ export function sendUpdateNameMessage(userId: number, name: string) {
   send(message);
 }
 
-export function sendCreateGameMessage(userId: number) {
+export function sendCreateGame(userId: number) {
   const message: CreateGameMessage = {
     type: "CreateGame",
     userId,
@@ -71,12 +71,33 @@ export function sendCreateGameMessage(userId: number) {
   send(message);
 }
 
-export function sendStartGameMessage(userId: number, gameId: number) {
+export function sendStartGame(userId: number, gameId: number) {
   const message: StartGameMessage = {
     type: "StartGame",
     userId,
     gameId,
   };
+
+  send(message);
+}
+
+export function sendUncover(userId: number, gameId: number, handIndex: number) {
+  const message: UncoverMessage = {
+    type: "Uncover",
+    userId,
+    gameId,
+    handIndex,
+  }
+
+  send(message);
+}
+
+export function sendTakeFromDeck(userId: number, gameId: number) {
+  const message: TakeFromDeckMessage = {
+    type: "TakeFromDeck",
+    userId,
+    gameId
+  }
 
   send(message);
 }

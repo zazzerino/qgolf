@@ -49,10 +49,47 @@ export interface Game {
   hostId: number;
   state: GameState;
   turn: number;
+  finalTurn: boolean;
   playerTurn: number;
   tableCards: CardName[];
   playableCards: CardLocation[];
   players: Player[];
+}
+
+export type GameEventType =
+  | 'UNCOVER'
+  | 'TAKE_FROM_DECK'
+  | 'TAKE_FROM_TABLE'
+  | 'SWAP_CARD'
+  | 'DISCARD'
+  ;
+
+export interface GameEvent {
+  type: GameEventType;
+  gameId: number;
+  playerId: number;
+}
+
+export interface UncoverEvent extends GameEvent {
+  type: 'UNCOVER';
+  handIndex: number;
+}
+
+export interface TakeFromDeckEvent extends GameEvent {
+  type: 'TAKE_FROM_DECK';
+}
+
+export interface TakeFromTableEvent extends GameEvent {
+  type: 'TAKE_FROM_TABLE';
+}
+
+export interface SwapCardEvent extends GameEvent {
+  type: 'SWAP_CARD';
+  handIndex: number;
+}
+
+export interface DiscardEvent extends GameEvent {
+  type: 'DISCARD';
 }
 
 export interface AppState {
@@ -67,7 +104,15 @@ export type Action =
   | {type: 'setGame', game: Game}
   ;
 
-export type MessageType = 'UpdateName' | 'CreateGame' | 'StartGame' | 'Event' | 'JoinGame' | 'Chat';
+export type MessageType =
+  | 'UpdateName'
+  | 'CreateGame'
+  | 'StartGame'
+  | 'JoinGame'
+  | 'Chat'
+  | 'Uncover'
+  | 'TakeFromDeck'
+  ;
 
 export interface Message {
   type: MessageType;
@@ -85,6 +130,17 @@ export interface CreateGameMessage extends Message {
 
 export interface StartGameMessage extends Message {
   type: 'StartGame';
+  gameId: number;
+}
+
+export interface UncoverMessage extends Message {
+  type: 'Uncover';
+  gameId: number;
+  handIndex: number;
+}
+
+export interface TakeFromDeckMessage extends Message {
+  type: 'TakeFromDeck';
   gameId: number;
 }
 

@@ -5,3 +5,7 @@
 .GameCanvas {
     background-color: seagreen;
 }
+
+.Hand rect {
+    opacity: 0;
+}

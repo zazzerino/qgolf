@@ -51,8 +51,8 @@ public interface GameEvent {
         }
     }
 
-    record DiscardHeld(Long gameId,
-                       Long playerId) implements GameEvent {
+    record Discard(Long gameId,
+                   Long playerId) implements GameEvent {
         @Override
         public Type type() {
             return Type.DISCARD;

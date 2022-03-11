@@ -38,18 +38,18 @@ public class WebSocket {
 
     @OnOpen
     public void onOpen(Session session) {
-        var sessionId = session.getId();
-        log.info("websocket connected: " + sessionId);
-        sessions.put(sessionId, session);
+        var id = session.getId();
+        log.info("websocket connected: " + id);
+        sessions.put(id, session);
         userController.connect(session);
     }
 
     @OnClose
     public void onClose(Session session) {
-        var sessionId = session.getId();
-        log.info("websocket closed: " + sessionId);
-        sessions.remove(sessionId);
-        userController.disconnect(sessionId);
+        var id = session.getId();
+        log.info("websocket closed: " + id);
+        sessions.remove(id);
+        userController.disconnect(id);
     }
 
     @OnMessage
@@ -64,7 +64,7 @@ public class WebSocket {
     }
 
     @OnError
-    public void onError(Session session, Throwable throwable) {
+    public void onError(Session _s, Throwable throwable) {
         log.error("ws error: ", throwable);
     }
 
@@ -83,9 +83,9 @@ public class WebSocket {
 
     public void updatePlayers(Game game) {
         for (var player : game.players()) {
-            var pid = player.id();
-            var sessionId = userService.findSessionId(pid).orElseThrow();
-            var gameDto = GameDto.from(game, pid);
+            var id = player.id();
+            var sessionId = userService.findSessionId(id).orElseThrow();
+            var gameDto = GameDto.from(game, id);
             var response = new Response.Game(gameDto);
             sendToSessionId(sessionId, response);
         }
@@ -101,6 +101,10 @@ public class WebSocket {
 
     private void handleStartGame(Session session, Message.StartGame message) {
         gameController.startGame(session, message.gameId());
+    }
+
+    private void handleUncover(Session session, Message.Uncover message) {
+//        gameController.un
     }
 
 //    public void sendToSessionIds(Collection<String> sessionIds, Response response) {

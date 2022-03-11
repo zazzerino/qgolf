@@ -64,7 +64,7 @@ public record GameRow(Long id,
                 .collect(Collectors.toMap(
                         Player::id,
                         Function.identity(),
-                        (prev, next) -> next,
+                        (_prev, next) -> next,
                         LinkedHashMap::new));
 
         return new Game(id, host, state, turn, finalTurn, deck, tableCards, playerMap);

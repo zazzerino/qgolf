@@ -1,21 +1,37 @@
 import {Card} from "./Card";
 import {GameState} from "../types";
-import {deckCoords} from "./coords";
+import {deckCoord} from "./coord";
+import {sendTakeFromDeck} from "../websocket";
 
 interface DeckProps {
-  gameState: GameState;
+  userId: number;
+  gameId: number;
+  state: GameState;
+  playerTurn: number;
 }
 
 export function Deck(props: DeckProps) {
-  const {gameState} = props;
-  const {x, y} = deckCoords(gameState);
+  const {userId, gameId, state, playerTurn} = props;
+  const {x, y} = deckCoord(state);
+  const onClick = () => onDeckClick(userId, gameId, state, playerTurn);
 
   return (
     <Card
       className="Deck"
-      name="2B"
+      cardName="2B"
       x={x}
       y={y}
+      onClick={onClick}
     />
   );
+}
+
+function onDeckClick(userId: number, gameId: number, state: GameState, playerTurn: number) {
+  const isUsersTurn = userId === playerTurn;
+  const isTakeState = state === "TAKE";
+  console.log('clicked deck');
+
+  if (isUsersTurn && isTakeState) {
+    sendTakeFromDeck(userId, gameId);
+  }
 }

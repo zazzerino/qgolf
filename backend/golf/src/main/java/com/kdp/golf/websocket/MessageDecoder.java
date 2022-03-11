@@ -29,6 +29,11 @@ public class MessageDecoder implements Decoder.Text<Message> {
                 var gameId = json.getLong("gameId");
                 return new Message.StartGame(userId, gameId);
             }
+            case Uncover -> {
+                var gameId = json.getLong("gameId");
+                var handIndex = json.getInteger("handIndex");
+                return new Message.Uncover(userId, gameId, handIndex);
+            }
         }
 
         throw new DecodeException(s, "could not decode message");

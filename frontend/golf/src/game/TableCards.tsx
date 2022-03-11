@@ -1,5 +1,5 @@
 import {Card} from "./Card";
-import {TABLE_CARD_COORD} from "./coords";
+import {TABLE_CARD_COORD} from "./coord";
 
 interface TableCardsProps {
   tableCards: string[];
@@ -15,7 +15,7 @@ export function TableCards(props: TableCardsProps) {
     <>
       <Card
         className="TableCards"
-        name={name}
+        cardName={name}
         x={x}
         y={y}
       />
