@@ -15,12 +15,12 @@ import static java.util.stream.Collectors.toCollection;
 
 public record PlayerRow(Long game,
                         Long user,
-                        List<String> handCards,
+                        List<String> cards,
                         List<Integer> uncovered,
                         @Nullable String heldCard) {
 
     public static PlayerRow from(Long gameId, Player p) {
-        var handCards = p.hand().cards().stream()
+        var cards = p.hand().cards().stream()
                 .map(Card::name)
                 .collect(toCollection(ArrayList::new));
 
@@ -30,11 +30,11 @@ public record PlayerRow(Long game,
                 .map(Card::name)
                 .orElse(null);
 
-        return new PlayerRow(gameId, p.id(), handCards, uncoveredCards, heldCard);
+        return new PlayerRow(gameId, p.id(), cards, uncoveredCards, heldCard);
     }
 
     public Player toPlayer(String name) {
-        var cards = handCards.stream()
+        var cards = this.cards.stream()
                 .map(Card::from)
                 .collect(toCollection(ArrayList::new));
 
@@ -44,20 +44,19 @@ public record PlayerRow(Long game,
     }
 
     public static class Mapper implements RowMapper<PlayerRow> {
-
         @Override
         public PlayerRow map(ResultSet rs, StatementContext ctx) throws SQLException {
             var game = rs.getLong("game");
             var user = rs.getLong("person");
 
-            var handCards = Arrays.asList(
-                    (String[]) rs.getArray("hand_cards").getArray());
+            var cards = Arrays.asList(
+                    (String[]) rs.getArray("cards").getArray());
 
-            var uncoveredCards = Arrays.asList(
+            var uncovered = Arrays.asList(
                     (Integer []) rs.getArray("uncovered").getArray());
 
             var heldCard = rs.getString("held_card");
-            return new PlayerRow(game, user, handCards, uncoveredCards, heldCard);
+            return new PlayerRow(game, user, cards, uncovered, heldCard);
         }
     }
 }

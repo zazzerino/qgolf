@@ -27,7 +27,7 @@ CREATE TABLE player
 (
     game            BIGINT NOT NULL,
     person          BIGINT NOT NULL,
-    hand_cards      TEXT[] NOT NULL,
+    cards           TEXT[] NOT NULL,
     uncovered       INT[]  NOT NULL,
     held_card       TEXT,
     PRIMARY KEY (game, person)

@@ -60,11 +60,17 @@ public class Player {
         return uncoveredCardCount() < 2;
     }
 
-    public Long id() { return id; }
+    public Long id() {
+        return id;
+    }
 
-    public String name() { return name; }
+    public String name() {
+        return name;
+    }
 
-    public Hand hand() { return hand; }
+    public Hand hand() {
+        return hand;
+    }
 
     public Optional<Card> heldCard() {
         return Optional.ofNullable(heldCard);

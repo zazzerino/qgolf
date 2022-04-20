@@ -29,7 +29,6 @@ export function Deck(props: DeckProps) {
 function onDeckClick(userId: number, gameId: number, state: GameState, playerTurn: number) {
   const isUsersTurn = userId === playerTurn;
   const isTakeState = state === "TAKE";
-  console.log('clicked deck');
 
   if (isUsersTurn && isTakeState) {
     sendTakeFromDeck(userId, gameId);

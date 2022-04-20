@@ -41,8 +41,8 @@ public class GameService {
         var game = gameRepository.findById(gameId).orElseThrow();
 
         if (!Objects.equals(game.hostId(), userId)) {
-            var msg = "user " + userId + " attempted to start game " + gameId + " but they are not the host";
-            throw new IllegalStateException(msg);
+            throw new IllegalStateException(
+                    "user " + userId + " attempted to start game " + gameId + " but they are not the host");
         }
 
         game.start();
@@ -51,9 +51,8 @@ public class GameService {
     }
 
     @Transactional
-    public Game handleEvent(GameEvent event) {
-        var id = event.gameId();
-        var game = gameRepository.findById(id).orElseThrow();
+    public Game handleGameEvent(GameEvent event) {
+        var game = gameRepository.findById(event.gameId()).orElseThrow();
         game.handleEvent(event);
         gameRepository.update(game);
         return game;

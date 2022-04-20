@@ -41,5 +41,10 @@ class GameServiceTest {
         var startedGame = gameService.startGame(game.id(), user.id());
         assertNotEquals(game, startedGame);
         assertEquals(Game.State.UNCOVER_TWO, startedGame.state());
+//        System.out.println(startedGame);
+
+        var foundGame = gameService.findGameById(game.id()).orElseThrow();
+        System.out.println(foundGame);
+        assertEquals(startedGame, foundGame);
     }
 }

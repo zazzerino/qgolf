@@ -8,7 +8,7 @@ public class User {
     private String name;
     private final String sessionId;
 
-    public static final String DEFAULT_NAME = "anon";
+    public static final String DEFAULT_NAME = "anonymous";
 
     public User(Long id, String name, String sessionId) {
         this.id = id;
@@ -21,7 +21,9 @@ public class User {
     }
 
     public String name() {
-        return name;
+        return java.util.Objects.equals(name, DEFAULT_NAME)
+                ? DEFAULT_NAME + id
+                : name;
     }
 
     public void setName(String name) {

@@ -17,6 +17,10 @@ export type GameState =
   | 'GAME_OVER'
   ;
 
+/**
+ * Must be 2 characters.
+ * e.g. "AS" is the ace of spades, "2H" is the two of hearts
+ */
 export type CardName = string;
 
 export type CardLocation =
@@ -109,9 +113,8 @@ export type MessageType =
   | 'CreateGame'
   | 'StartGame'
   | 'JoinGame'
+  | 'GameEvent'
   | 'Chat'
-  | 'Uncover'
-  | 'TakeFromDeck'
   ;
 
 export interface Message {
@@ -133,15 +136,11 @@ export interface StartGameMessage extends Message {
   gameId: number;
 }
 
-export interface UncoverMessage extends Message {
-  type: 'Uncover';
+export interface GameEventMessage extends Message {
+  type: 'GameEvent';
   gameId: number;
-  handIndex: number;
-}
-
-export interface TakeFromDeckMessage extends Message {
-  type: 'TakeFromDeck';
-  gameId: number;
+  eventType: GameEventType;
+  handIndex?: number;
 }
 
 export type ResponseType = 'User' | 'Game' | 'Games';

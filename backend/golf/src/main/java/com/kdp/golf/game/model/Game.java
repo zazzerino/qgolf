@@ -127,9 +127,6 @@ public class Game {
                 }
             }
         }
-
-        var msg = "unexpected value. state: " + state + " event: " + event;
-        throw new IllegalStateException(msg);
     }
 
     private void uncoverTwo(Player player, int handIndex) {
@@ -174,7 +171,7 @@ public class Game {
 
         if (hasOneCoveredCard) {
             state = State.TAKE;
-            turn++;
+            ++turn;
         } else {
             state = State.UNCOVER;
         }
@@ -233,21 +230,37 @@ public class Game {
         Lib.cycleLinkedHashMap(players);
     }
 
-    public Long id() { return id; }
+    public Long id() {
+        return id;
+    }
 
-    public void setId(@NotNull Long id) { this.id = id; }
+    public void setId(@NotNull Long id) {
+        this.id = id;
+    }
 
-    public Long hostId() { return hostId; }
+    public Long hostId() {
+        return hostId;
+    }
 
-    public State state() { return state; }
+    public State state() {
+        return state;
+    }
 
-    public int turn() { return turn; }
+    public int turn() {
+        return turn;
+    }
 
-    public Deck deck() { return deck; }
+    public Deck deck() {
+        return deck;
+    }
 
-    public Collection<Card> tableCards() { return tableCards; }
+    public Collection<Card> tableCards() {
+        return tableCards;
+    }
 
-    public boolean isFinalTurn() { return finalTurn; }
+    public boolean isFinalTurn() {
+        return finalTurn;
+    }
 
     public Optional<Player> getPlayer(Long playerId) {
         return Optional.ofNullable(players.get(playerId));

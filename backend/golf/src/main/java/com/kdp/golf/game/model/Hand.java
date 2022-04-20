@@ -111,9 +111,13 @@ public class Hand {
         return 0;
     }
 
-    public List<Card> cards() { return cards; }
+    public List<Card> cards() {
+        return cards;
+    }
 
-    public Set<Integer> uncovered() { return uncovered; }
+    public Set<Integer> uncovered() {
+        return uncovered;
+    }
 
     @Override
     public boolean equals(Object o) {

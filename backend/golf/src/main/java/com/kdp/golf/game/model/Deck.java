@@ -24,7 +24,7 @@ public class Deck {
         return new Deck(cards);
     }
 
-    public static Collection<Card> enumerateCards() {
+    private static Collection<Card> enumerateCards() {
         var suits = Card.Suit.values();
         var ranks = Card.Rank.values();
         var cards = new ArrayDeque<Card>();
@@ -54,7 +54,9 @@ public class Deck {
         }
     }
 
-    public Collection<Card> cards() { return cards; }
+    public Collection<Card> cards() {
+        return cards;
+    }
 
     @Override
     public boolean equals(Object o) {

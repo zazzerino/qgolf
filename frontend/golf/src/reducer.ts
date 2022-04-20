@@ -1,6 +1,6 @@
 import {Action, AppState, User} from "./types";
 
-export const DEFAULT_USER: User = {id: -1, name: "anon"}
+export const DEFAULT_USER: User = {id: -1, name: "anonymous"}
 
 export const INITIAL_STATE: AppState = {
   user: DEFAULT_USER,

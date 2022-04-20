@@ -1,10 +1,10 @@
 import {Dispatch} from "react";
 import {
   Action,
-  CreateGameMessage,
+  CreateGameMessage, GameEventMessage,
   GameResponse,
   Message, Response,
-  StartGameMessage, TakeFromDeckMessage, UncoverMessage,
+  StartGameMessage,
   UpdateNameMessage,
   UserResponse
 } from "./types";
@@ -52,7 +52,7 @@ function send(message: Message) {
   SOCKET.send(JSON.stringify(message));
 }
 
-export function sendUpdateNameMessage(userId: number, name: string) {
+export function sendUpdateName(userId: number, name: string) {
   const message: UpdateNameMessage = {
     type: "UpdateName",
     userId,
@@ -82,8 +82,9 @@ export function sendStartGame(userId: number, gameId: number) {
 }
 
 export function sendUncover(userId: number, gameId: number, handIndex: number) {
-  const message: UncoverMessage = {
-    type: "Uncover",
+  const message: GameEventMessage = {
+    type: "GameEvent",
+    eventType: "UNCOVER",
     userId,
     gameId,
     handIndex,
@@ -93,8 +94,9 @@ export function sendUncover(userId: number, gameId: number, handIndex: number) {
 }
 
 export function sendTakeFromDeck(userId: number, gameId: number) {
-  const message: TakeFromDeckMessage = {
-    type: "TakeFromDeck",
+  const message: GameEventMessage = {
+    type: "GameEvent",
+    eventType: "TAKE_FROM_DECK",
     userId,
     gameId
   }

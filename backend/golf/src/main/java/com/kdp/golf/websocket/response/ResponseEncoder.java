@@ -1,4 +1,4 @@
-package com.kdp.golf.websocket;
+package com.kdp.golf.websocket.response;
 
 import io.vertx.core.json.Json;
 

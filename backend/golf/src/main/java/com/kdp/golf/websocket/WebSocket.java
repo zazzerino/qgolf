@@ -5,6 +5,10 @@ import com.kdp.golf.game.dto.GameDto;
 import com.kdp.golf.game.model.Game;
 import com.kdp.golf.user.UserController;
 import com.kdp.golf.user.UserService;
+import com.kdp.golf.websocket.message.*;
+import com.kdp.golf.websocket.response.GameResponse;
+import com.kdp.golf.websocket.response.Response;
+import com.kdp.golf.websocket.response.ResponseEncoder;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -38,18 +42,18 @@ public class WebSocket {
 
     @OnOpen
     public void onOpen(Session session) {
-        var id = session.getId();
-        log.info("websocket connected: " + id);
-        sessions.put(id, session);
+        var sessionId = session.getId();
+        log.info("websocket connected: " + sessionId);
+        sessions.put(sessionId, session);
         userController.connect(session);
     }
 
     @OnClose
     public void onClose(Session session) {
-        var id = session.getId();
-        log.info("websocket closed: " + id);
-        sessions.remove(id);
-        userController.disconnect(id);
+        var sessionId = session.getId();
+        log.info("websocket closed: " + sessionId);
+        sessions.remove(sessionId);
+        userController.disconnect(sessionId);
     }
 
     @OnMessage
@@ -57,9 +61,10 @@ public class WebSocket {
         log.info("message received: " + message);
 
         switch (message.type()) {
-            case UpdateName -> handleUpdateName(session, (Message.UpdateName) message);
+            case UpdateName -> handleUpdateName(session, (UpdateNameMessage) message);
             case CreateGame -> handleCreateGame(session);
-            case StartGame -> handleStartGame(session, (Message.StartGame) message);
+            case StartGame -> handleStartGame(session, (StartGameMessage) message);
+            case GameEvent -> handleGameEventMessage(session, (GameEventMessage) message);
         }
     }
 
@@ -83,15 +88,14 @@ public class WebSocket {
 
     public void updatePlayers(Game game) {
         for (var player : game.players()) {
-            var id = player.id();
-            var sessionId = userService.findSessionId(id).orElseThrow();
-            var gameDto = GameDto.from(game, id);
-            var response = new Response.Game(gameDto);
+            var sessionId = userService.findSessionId(player.id()).orElseThrow();
+            var gameDto = GameDto.from(game, player.id());
+            var response = new GameResponse(gameDto);
             sendToSessionId(sessionId, response);
         }
     }
 
-    private void handleUpdateName(Session session, Message.UpdateName message) {
+    private void handleUpdateName(Session session, UpdateNameMessage message) {
         userController.updateName(session, message.name());
     }
 
@@ -99,12 +103,12 @@ public class WebSocket {
         gameController.createGame(session);
     }
 
-    private void handleStartGame(Session session, Message.StartGame message) {
+    private void handleStartGame(Session session, StartGameMessage message) {
         gameController.startGame(session, message.gameId());
     }
 
-    private void handleUncover(Session session, Message.Uncover message) {
-//        gameController.un
+    private void handleGameEventMessage(Session session, GameEventMessage message) {
+        gameController.handleGameEvent(session, message.gameEvent());
     }
 
 //    public void sendToSessionIds(Collection<String> sessionIds, Response response) {

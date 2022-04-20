@@ -21,7 +21,7 @@ function App() {
         <Navbar user={user} />
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/user" element={<UserPage user={user} />} />
+          <Route path="/user" element={<UserPage userId={user.id} />} />
           <Route path="/game" element={<GamePage user={user} game={game} />} />
         </Routes>
       </BrowserRouter>

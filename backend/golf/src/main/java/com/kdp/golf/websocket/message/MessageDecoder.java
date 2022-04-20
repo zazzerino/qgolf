@@ -1,10 +1,12 @@
-package com.kdp.golf.websocket;
+package com.kdp.golf.websocket.message;
 
+import com.kdp.golf.game.model.GameEvent;
 import io.vertx.core.json.JsonObject;
 
 import javax.websocket.DecodeException;
 import javax.websocket.Decoder;
 import javax.websocket.EndpointConfig;
+import java.util.Optional;
 
 public class MessageDecoder implements Decoder.Text<Message> {
 
@@ -16,23 +18,24 @@ public class MessageDecoder implements Decoder.Text<Message> {
         switch (typeOf(json)) {
             case UpdateName -> {
                 var name = json.getString("name");
-                return new Message.UpdateName(userId, name);
+                return new UpdateNameMessage(userId, name);
             }
             case CreateGame -> {
-                return new Message.CreateGame(userId);
+                return new CreateGameMessage(userId);
             }
             case JoinGame -> {
                 var gameId = json.getLong("gameId");
-                return new Message.JoinGame(userId, gameId);
+                return new JoinGameMessage(userId, gameId);
             }
             case StartGame -> {
                 var gameId = json.getLong("gameId");
-                return new Message.StartGame(userId, gameId);
+                return new StartGameMessage(userId, gameId);
             }
-            case Uncover -> {
+            case GameEvent -> {
                 var gameId = json.getLong("gameId");
-                var handIndex = json.getInteger("handIndex");
-                return new Message.Uncover(userId, gameId, handIndex);
+                var eventType = GameEvent.Type.valueOf(json.getString("eventType"));
+                var handIndex = Optional.ofNullable(json.getInteger("handIndex"));
+                return new GameEventMessage(userId, gameId, eventType, handIndex);
             }
         }
 

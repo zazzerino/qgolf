@@ -3,7 +3,7 @@ package com.kdp.golf.game;
 import com.kdp.golf.game.dto.GameDto;
 import com.kdp.golf.game.model.GameEvent;
 import com.kdp.golf.user.UserService;
-import com.kdp.golf.websocket.Response;
+import com.kdp.golf.websocket.response.GameResponse;
 import com.kdp.golf.websocket.WebSocket;
 import org.jboss.logging.Logger;
 
@@ -29,7 +29,7 @@ public class GameController {
         var game = gameService.createGame(userId);
         log.info("game created: " + game);
         var gameDto = GameDto.from(game, userId);
-        var response = new Response.Game(gameDto);
+        var response = new GameResponse(gameDto);
         webSocket.sendToSession(session, response);
     }
 
@@ -40,9 +40,9 @@ public class GameController {
         webSocket.updatePlayers(game);
     }
 
-    public void handleEvent(Session session, GameEvent event) {
+    public void handleGameEvent(Session _session, GameEvent event) {
         log.info("handling event: " + event);
-        var game = gameService.handleEvent(event);
+        var game = gameService.handleGameEvent(event);
         log.info("event handled: " + game);
         webSocket.updatePlayers(game);
     }

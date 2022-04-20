@@ -1,15 +1,19 @@
-import {User} from "../types";
 import React, {Dispatch, SetStateAction, useState} from "react";
-import {sendUpdateNameMessage} from "../websocket";
+import {sendUpdateName} from "../websocket";
 
-interface NameInputProps {
-  userId: number;
-  name: string;
-  setName: Dispatch<SetStateAction<string>>;
+export function UserPage(props: {userId: number}) {
+  return (
+    <div className="UserPage">
+      <h2>User</h2>
+      <h4>Change username</h4>
+      <NameInput userId={props.userId} />
+    </div>
+  );
 }
 
-function NameInput(props: NameInputProps) {
-  const {name, setName, userId} = props;
+function NameInput(props: {userId: number}) {
+  const userId = props.userId;
+  const [name, setName] = useState("");
 
   return (
     <>
@@ -21,30 +25,13 @@ function NameInput(props: NameInputProps) {
         }}
         onKeyPress={event => {
           if (event.key === "Enter") {
-            sendUpdateNameMessage(userId, name);
+            sendUpdateName(userId, name);
           }
         }}
       />
-      <button onClick={() => sendUpdateNameMessage(userId, name)}>
+      <button onClick={() => sendUpdateName(userId, name)}>
         Send
       </button>
     </>
-  );
-}
-
-export function UserPage(props: {user: User}) {
-  const [name, setName] = useState("");
-  const {user} = props;
-
-  return (
-    <div className="UserPage">
-      <h2>User</h2>
-      <h4>Change username</h4>
-      <NameInput
-        name={name}
-        setName={setName}
-        userId={user.id}
-      />
-    </div>
   );
 }

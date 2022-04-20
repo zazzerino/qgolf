@@ -44,10 +44,10 @@ public class GameRepository {
 
         var game = Game.create(null, player);
         var gameRow = GameRow.from(game);
-        var id = gameRowDao.create(gameRow);
-        game.setId(id);
+        var gameId = gameRowDao.create(gameRow);
+        game.setId(gameId);
 
-        var playerRow = PlayerRow.from(game.id(), player);
+        var playerRow = PlayerRow.from(gameId, player);
         playerRowDao.create(playerRow);
 
         return game;
